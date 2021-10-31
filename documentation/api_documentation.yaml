@@ -1,0 +1,428 @@
+openapi: 3.0.3
+info:
+  title: RumahResep Project
+  version: 1.0.0
+  description: RumahResep RESTfulAPI Project Documentation with Echo Framework (Golang)
+servers:
+  - url: http://servername/api/
+    description: API Access Link for RumahResep Project
+tags:
+  - name: Auth
+    description: API Authentication
+  - name: Users
+    description: API Users
+  - name: Recipes
+    description: API Recipes
+  - name: Categories
+    description: API Recipes Categories
+  - name: Carts
+    description: API Carts
+  - name: Transaction
+    description: API Transactions
+  - name: Transaction Histories
+    description: API Transaction Histories
+  - name: Payment Midtrans
+    description: API Snap Midtrans
+  - name: Maps
+    description: API Location Maps
+
+paths:
+  /register:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Auth
+      summary: Register User
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                address:
+                  type: string
+                gender:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseRegister'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /login:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Auth
+      summary: Login User
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/ResponseLogin'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Users
+      summary: Get All User
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /users/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Users
+      summary: Get User by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific User
+          schema:
+            type: integer 
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+          
+  /recipes:
+    get:
+      tags:
+        - Recipes
+      summary: Get All Recipe
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /recipes/{id}:
+    get:
+      tags:
+        - Recipes
+      summary: Get Recipe by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Recipe
+          schema:
+            type: integer 
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Recipes
+      summary: Edit Recipe by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Recipe
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: integer
+                stock:
+                  type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Recipes
+      summary: Delete Product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Product
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: "#/components/responses/StatusOK"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /categories:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Get All Recipe Category
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Add Recipe Category
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /categories/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Get Recipe Categories by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Recipe Category
+          schema:
+            type: integer 
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Edit Recipe Categories by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Recipe Categories
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Delete Recipe Categories by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Categories
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: "#/components/responses/StatusOK"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: '#/components/responses/ServerError'
+ 
+  /transaction?status=done:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction Histories
+      summary: Get Transaction Histories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Get All Transaction History
+          schema:
+            type: integer 
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  
+  /carts/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      summary: Get Recipe Item by Cart ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Cart
+          schema:
+            type: integer 
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      summary: Edit Recipe Item in Cart by Cart ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Cart
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+
+
+components:
+  responses:
+    StatusOK:
+      description: Status OK
+      content:
+        application/json:
+          example:
+            success: true
+            message: Status OK
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          example:
+            success: false
+            message: Bad Request
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          example:
+            success: false
+            message: Internal Server Error
+    ResponseRegister:
+      description: Success Register Account
+      content:
+        application/json:
+          example:
+            success: true
+            message: Success Register Account
+    ResponseLogin:
+      description: Success Login
+      content:
+        application/json:
+          example:
+            success: true
+            message: Success Login
+            token: exc54WqsR6ryu.mYTW340iPIlkqb
