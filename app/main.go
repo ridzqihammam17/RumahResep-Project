@@ -6,9 +6,11 @@ import (
 	"rumah_resep/models"
 	"rumah_resep/util"
 
-	// "rumah_resep/util"
-	authControllers "rumah_resep/api/controllers/auth"
-	cartControllers "rumah_resep/api/controllers/carts"
+	authController "rumah_resep/api/controllers/auth"
+  cartControllers "rumah_resep/api/controllers/carts"
+	"rumah_resep/models"
+	"rumah_resep/util"
+	"rumah_resep/api/middlewares"
 	"rumah_resep/api/router"
 
 	"github.com/labstack/echo/v4"
@@ -30,9 +32,10 @@ func main() {
 	newCartController := cartControllers.NewCartController(cartModel)
 	newAuthController := authControllers.NewAuthController(userModel)
 
-	// newCheckoutController := controllers.NewCheckoutController(checkoutModel)
-	//create echo http
+
+	//create echo http with log
 	e := echo.New()
+	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
 	router.Route(e, newAuthController, newCartController)

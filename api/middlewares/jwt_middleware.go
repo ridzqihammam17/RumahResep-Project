@@ -6,7 +6,9 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
+
 
 func CreateToken(userId int, role string) (string, error) {
 	claims := jwt.MapClaims{}

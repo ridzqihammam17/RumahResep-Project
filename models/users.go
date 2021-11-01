@@ -48,6 +48,7 @@ func (m *GormUserModel) Login(email, password string) (User, error) {
 
 	user.Token, err = middlewares.CreateToken(int(user.ID), user.Role)
 
+
 	if err != nil {
 		return user, err
 	}
