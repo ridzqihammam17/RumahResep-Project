@@ -25,4 +25,5 @@ func Route(
 
 	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
 	e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
+	e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
 }

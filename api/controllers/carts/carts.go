@@ -1,6 +1,7 @@
 package carts
 
 import (
+	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
@@ -125,13 +126,47 @@ func (controller *CartController) CreateCartController(c echo.Context) error {
 }
 
 //func for update total quantity and total price on table carts
-// func (controller *CartController) UpdateTotalCart(cartId int) (int, int) {
-// 	newTotalPrice, _ := controller.cartModel.GetTotalPrice(cartId)
-// 	newTotalQty, _ := controller.cartModel.GetTotalQty(cartId)
-// 	newCart, _ := controller.cartModel.UpdateTotalCart(cartId, newTotalPrice, newTotalQty)
+func (controller *CartController) UpdateCartController(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
 
-// 	return newCart.TotalQuantity, newCart.TotalPrice
-// }
+	// get id user & role login
+	userId, role := middlewares.ExtractTokenUser(c)
+	fmt.Println(userId, role)
+	// check role is customer
+	if role != "customer" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Role not Customer",
+		})
+	}
+	// listCart, _ := controller.cartModel.GetCartById(userId) //get cart by id
+	// recipes, _ := controller.cartDetailModel.GetListRecipeCart(id) //get all recipes based on cart id
+
+	// custom data cart for body response
+	var newCart models.Cart
+	c.Bind(&newCart)
+	outputCart := models.Cart{
+		// "ID": listCart.ID,
+		// "customers_id":        listCart.CustomersID,
+		// "payment_methods_id":  listCart.PaymentMethodsID,
+		// "status_transactions": listCart.StatusTransactions,
+		TotalQuantity: newCart.TotalQuantity,
+		TotalPrice:    newCart.TotalPrice,
+		// "customer_id":    listCart.UserID,
+		// "CreatedAt":           listCart.CreatedAt,
+		// "UpdatedAt":           listCart.UpdatedAt,
+		// "DeletedAt":           listCart.DeletedAt,
+	}
+	// newTotalPrice, _ := controller.cartModel.GetTotalPrice(userId)
+	// newTotalQty, _ := controller.cartModel.GetTotalQty(userId)
+	// fmt.Println(newTotalPrice, newTotalQty)
+	newCartq, _ := controller.cartModel.UpdateTotalCart(outputCart, id)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"cart": newCartq,
+		// "cartDetails": newCartDetail,
+		"status": "Update cart success",
+	})
+}
 
 func (controller *CartController) GetCartController(c echo.Context) error {
 	//convert cart_id

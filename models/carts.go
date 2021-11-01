@@ -23,9 +23,9 @@ func NewCartModel(db *gorm.DB) *GormCartModel {
 type CartModel interface {
 	CreateCart(cart Cart) (Cart, error)
 	GetCart(cartId int) (Cart, error)
-	// GetTotalPrice(cartId int) (int, error)
-	// GetTotalQty(cartId int) (int, error)
-	// UpdateTotalCart(cartId int, newTotalPrice int, newTotalQty int) (Cart, error)
+	GetTotalPrice(cartId int) (int, error)
+	GetTotalQty(cartId int) (int, error)
+	UpdateTotalCart(cart Cart, cartId int) (Cart, error)
 	CheckCartId(cartId int) (interface{}, error)
 	GetCartById(id int) (Cart, error)
 	// DeleteCart(cartId int) (cart Cart, err error)
@@ -50,33 +50,44 @@ func (m *GormCartModel) GetCart(cartId int) (Cart, error) {
 
 // get total price
 func (m *GormCartModel) GetTotalPrice(cartId int) (int, error) {
-	var totalPrice int
-	if err := m.db.Select("sum(cart_details.price*cart_details.quantity)").Joins("JOIN carts ON carts.id = cart_details.carts_id").Where("carts_id=?", cartId).First(&totalPrice).Error; err == nil {
-		return totalPrice, err
+	var cart Cart
+	newTotalPrice := cart.TotalPrice
+	// var totalQty int
+	// if err := m.db.Select("sum(cart_details.price*cart_details.quantity)").Joins("JOIN carts ON carts.id = cart_details.carts_id").Where("carts_id=?", cartId).First(&totalPrice).Error; err == nil {
+	// 	return totalPrice, err
+	// }
+	// return totalPrice, nil
+	if err := m.db.Model(&Cart{}).Where("user_id = ?", cartId).Update("total_price", newTotalPrice).Error; err == nil {
+		return newTotalPrice, err
 	}
-	return totalPrice, nil
+	return newTotalPrice, nil
+
 }
 
 //get total quantity
 func (m *GormCartModel) GetTotalQty(cartId int) (int, error) {
-	var cartDetails CartDetails
-	var totalQty int
-	if err := m.db.Model(&cartDetails).Select("SUM(cart_details.quantity)").Joins("JOIN carts ON carts.id = cart_details.carts_id").Where("carts_id=?", cartId).First(&totalQty).Error; err == nil {
-		return totalQty, err
+	// var cartDetails CartDetails
+	var cart Cart
+	newTotalQty := cart.TotalQuantity
+	// if err := m.db.Model(&cartDetails).Select("SUM(cart_details.quantity)").Joins("JOIN carts ON carts.id = cart_details.carts_id").Where("carts_id=?", cartId).First(&totalQty).Error; err == nil {
+	// 	return totalQty, err
+	// }
+	if err := m.db.Model(&Cart{}).Where("user_id = ?", cartId).Update("total_price", newTotalQty).Error; err == nil {
+		return newTotalQty, err
 	}
-	return totalQty, nil
+	return newTotalQty, nil
 }
 
 //update total cart
-func (m *GormCartModel) UpdateTotalCart(cartId int, newTotalPrice int, newTotalQty int) (Cart, error) {
+func (m *GormCartModel) UpdateTotalCart(newCart Cart, userId int) (Cart, error) {
 	var cart Cart
 
-	if err := m.db.Find(&cart, "id=?", cartId).Error; err != nil {
+	if err := m.db.Find(&cart, userId).Error; err != nil {
 		return cart, err
 	}
 
-	cart.TotalQuantity += newTotalQty
-	cart.TotalPrice += (newTotalPrice * newTotalQty)
+	cart.TotalQuantity = newCart.TotalQuantity
+	cart.TotalPrice = newCart.TotalPrice
 
 	if err := m.db.Save(&cart).Error; err != nil {
 		return cart, err
