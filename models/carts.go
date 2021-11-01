@@ -32,8 +32,8 @@ type CartModel interface {
 }
 
 func (m *GormCartModel) CreateCart(cart Cart) (Cart, error) {
-
-	if err := m.db.Select(&cart, "NOT EXISTS (SELECT * FROM users WHERE user_id=?", cart.UserID).Save(&cart).Error; err != nil {
+	// Select(&cart, "NOT EXISTS (SELECT * FROM carts WHERE user_id=?", cart.UserID).
+	if err := m.db.Save(&cart).Error; err != nil {
 		return cart, err
 	}
 	return cart, nil
