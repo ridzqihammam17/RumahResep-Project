@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"rumah_resep/config"
-
-	authController "rumah_resep/api/controllers/auth"
 	"rumah_resep/models"
 	"rumah_resep/util"
 
-	// "rumah_resep/util"
+	authController "rumah_resep/api/controllers/auth"
+  cartControllers "rumah_resep/api/controllers/carts"
+	"rumah_resep/models"
+	"rumah_resep/util"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/api/router"
 
@@ -24,20 +25,20 @@ func main() {
 	db := util.MysqlDatabaseConnection(config)
 
 	//initiate model
+	cartModel := models.NewCartModel(db)
 	userModel := models.NewUserModel(db)
 
 	//initiate controller
-	newAuthController := authController.NewAuthController(userModel)
+	newCartController := cartControllers.NewCartController(cartModel)
+	newAuthController := authControllers.NewAuthController(userModel)
+
 
 	//create echo http with log
 	e := echo.New()
 	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
-	router.Route(
-		e,
-		newAuthController,
-	)
+	router.Route(e, newAuthController, newCartController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)
