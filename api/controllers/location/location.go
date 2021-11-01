@@ -139,7 +139,6 @@ func httpRequest(url string) (models.Results, error) {
 
 // Geocoding function is used to convert an Address structure
 // to a Location structure (latitude and longitude)
-var API_KEY = "AIzaSyA2r99yOzOMfMDRk0YxKkvzrQTeWuzfncY"
 func Geocoding(address Address) (Location, error) {
 	var location Location
 	// Convert whitespaces to +
