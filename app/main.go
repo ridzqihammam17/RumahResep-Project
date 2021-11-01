@@ -3,8 +3,12 @@ package main
 import (
 	"fmt"
 	"rumah_resep/config"
+	"rumah_resep/models"
+	"rumah_resep/util"
 
 	// "rumah_resep/util"
+	authControllers "rumah_resep/api/controllers/auth"
+	cartControllers "rumah_resep/api/controllers/carts"
 	"rumah_resep/api/router"
 
 	"github.com/labstack/echo/v4"
@@ -16,20 +20,22 @@ func main() {
 	config := config.GetConfig()
 
 	//initialize database connection based on given config
-	// db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnection(config)
 
 	//initiate model
-	// userModel := models.NewUserModel(db)
+	cartModel := models.NewCartModel(db)
+	userModel := models.NewUserModel(db)
 
 	//initiate controller
-	// newUserController := controllers.NewUserController(userModel)
+	newCartController := cartControllers.NewCartController(cartModel)
+	newAuthController := authControllers.NewAuthController(userModel)
 
 	// newCheckoutController := controllers.NewCheckoutController(checkoutModel)
 	//create echo http
 	e := echo.New()
 
 	//register API path and controller
-	router.Route(e)
+	router.Route(e, newAuthController, newCartController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)
