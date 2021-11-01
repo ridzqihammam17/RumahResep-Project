@@ -1,8 +1,0 @@
-port: 8080
-database:
-  driver: "mysql" #possible value are mongodb or mysql
-  address: "127.0.0.1"
-  port: 3306
-  username: "root"
-  password: "root"
-  name: "rumah-resep-api"

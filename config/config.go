@@ -1,22 +1,17 @@
 package config
 
 import (
+	"os"
+	"strconv"
 	"sync"
-
-	"github.com/labstack/gommon/log"
-	"github.com/spf13/viper"
 )
 
 //AppConfig Application configuration
 type AppConfig struct {
-	Port     int `yaml:"port"`
+	Port     int
 	Database struct {
-		Driver   string `yaml:"driver"`
-		Name     string `yaml:"name"`
-		Address  string `yaml:"address"`
-		Port     int    `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
+		Driver     string
+		Connection string
 	}
 }
 
@@ -34,31 +29,24 @@ func GetConfig() *AppConfig {
 	return appConfig
 }
 
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
 func initConfig() *AppConfig {
 	var defaultConfig AppConfig
-	defaultConfig.Port = 8080
-	defaultConfig.Database.Driver = "mysql"
-	defaultConfig.Database.Name = "rumah-resep-api"
-	defaultConfig.Database.Address = "localhost"
-	defaultConfig.Database.Port = 3306
-	defaultConfig.Database.Username = "root"
-	defaultConfig.Database.Password = "root"
 
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("config")
-	viper.AddConfigPath("./config/")
-
-	if err := viper.ReadInConfig(); err != nil {
-		// log.Info("error to load config file, will use default value ", err)
-		return &defaultConfig
-	}
-
-	var finalConfig AppConfig
-	err := viper.Unmarshal(&finalConfig)
+	httpPort, err := strconv.Atoi(getEnv("HTTP_PORT", "8080"))
 	if err != nil {
-		log.Info("failed to extract config, will use default value")
 		return &defaultConfig
 	}
 
-	return &finalConfig
+	defaultConfig.Port = httpPort
+	defaultConfig.Database.Driver = "mysql"
+	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/db-rumah-resep?charset=utf8&parseTime=True&loc=Local")
+
+	return &defaultConfig
 }
