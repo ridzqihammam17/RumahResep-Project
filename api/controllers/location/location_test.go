@@ -1,6 +1,7 @@
 package location
 
 import (
+	"errors"
 	"testing"
 
 	"rumah_resep/config"
@@ -52,4 +53,115 @@ func TestCalculateDistance(t *testing.T) {
 		t.Errorf("unexpected result: got %v", result)
 	}
 }
+func TestFormatAddress(t *testing.T){
+	var address1 Address
+	var address2 Address
+	var address3 Address
+	var address4 Address
 
+	address2 = Address{
+		Street:  "Jl. Pemuda",
+		Number:  6,
+		City:    "East Jakarta",
+		Country: "Indonesia",
+	}
+
+	address3 = Address{
+		Street:     "Jl. Pemuda",
+		Number:     6,
+		District:   "Jati",
+		City:       "East Jakarta",
+		State:      "DKI Jakarta",
+		Country:    "Indonesia",
+		PostalCode: "13220",
+	}
+
+	address4 = Address{
+		Number: 6,
+	}
+
+	// Table tests
+	var tTests = []struct {
+		address          Address
+		formattedAddress string
+	}{
+		{address1, ""},
+		{address2, "6, Jl. Pemuda, East Jakarta, Indonesia"},
+		{address3, "6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"},
+		{address4, "6"},
+	}
+
+	// Test with all values from the tTests
+	for _, pair := range tTests {
+		formattedAddress := pair.address.FormatAddress()
+
+		if formattedAddress != pair.formattedAddress {
+			t.Error("Expected:", pair.formattedAddress,
+				"Received:", formattedAddress)
+		}
+	}
+}
+func TestGeocoding(t *testing.T) {
+	config.InitGMapsConfig()
+	var address1 Address
+	var address2 Address
+
+	var location1 Location
+	var location2 Location
+
+	location1 = Location{
+		Latitude:  0.0,
+		Longitude: 0.0,
+	}
+
+	location2 = Location{
+		Latitude: -6.1917111,
+		Longitude: 106.8897306,
+	}
+
+	address2 = Address{
+		Street:     "Jl. Pemuda",
+		Number:     6,
+		District:   "Jati",
+		City:       "East Jakarta",
+		State:      "DKI Jakarta",
+		Country:    "Indonesia",
+		PostalCode: "13220",
+	}
+
+	// Table tests
+	var tTests = []struct {
+		address  Address
+		location Location
+		err      error
+	}{
+		{address1, location1, errors.New("Empty Address")},
+		{address2, location2, nil},
+	}
+
+	// Test with all values from the tTests
+	for _, pair := range tTests {
+		location, err := Geocoding(pair.address)
+
+		if pair.err != nil {
+			if err == nil {
+				t.Error("Expected:", pair.err,
+					"Received: nil")
+			}
+		} else {
+			if err != nil {
+				t.Error("Expected: nil",
+					"Received:", err)
+			}
+		}
+		if location.Latitude != pair.location.Latitude {
+			t.Error("Expected:", pair.location.Latitude,
+				"Received:", location.Latitude)
+		}
+		if location.Longitude != pair.location.Longitude {
+			t.Error("Expected:", pair.location.Longitude,
+				"Received:", location.Longitude)
+		}
+	}
+
+}

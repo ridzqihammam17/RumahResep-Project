@@ -5,41 +5,166 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
-	"net/http/httptest"
 	"regexp"
+	"strconv"
 	"strings"
 	_ "sync"
 	_ "sync/atomic"
-	"testing"
+
+	"rumah_resep/config"
+	"rumah_resep/models"
 
 	"github.com/sirupsen/logrus"
-	"rumah_resep/config"
 )
 
-
-var isTest bool
-
-//Test use test mode
-func Test() {
-	isTest = true
+type Address struct {
+	Street           string
+	Number           int
+	Neighborhood     string
+	District         string
+	City             string
+	County           string
+	State            string
+	Country          string
+	PostalCode       string
+	FormattedAddress string
+	Types            string
 }
+
+// Location structure used in the Geocoding and GeocodingReverse functions
+type Location struct {
+	Latitude  float64
+	Longitude float64
+}
+
+
 var re = regexp.MustCompile(`^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$`)
 
 func validateLatLong(latitude, longitude string) bool {
 	return re.MatchString(latitude + "," + longitude)
 }
 
-//CheckResponse CheckResponse for test
-func CheckResponse(rr *httptest.ResponseRecorder, expectedCode int, expected string, t *testing.T) {
-	if status := rr.Code; status != expectedCode {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, expectedCode)
+func (address *Address) FormatAddress() string {
+
+	// Creats a slice with all content from the Address struct
+	var content []string
+	if address.Number > 0 {
+		content = append(content, strconv.Itoa(address.Number))
+	}
+	content = append(content, address.Street)
+	content = append(content, address.Neighborhood)
+	content = append(content, address.District)
+	content = append(content, address.PostalCode)
+	content = append(content, address.City)
+	content = append(content, address.County)
+	content = append(content, address.State)
+	content = append(content, address.Country)
+
+	var formattedAddress string
+
+	// For each value in the content slice check if it is valid
+	// and add to the formattedAddress string
+	for _, value := range content {
+		if value != "" {
+			if formattedAddress != "" {
+				formattedAddress += ", "
+			}
+			formattedAddress += value
+		}
+	}
+	return formattedAddress
+}
+
+// httpRequest function send the HTTP request, decode the JSON
+// and return a Results structure
+func httpRequest(url string) (models.Results, error) {
+
+	var results models.Results
+
+	// Build the request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return results, err
 	}
 
-	output := strings.Trim(rr.Body.String(), "\n")
-	if expected != `ignore` && output != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", output, expected)
+	// For control over HTTP client headers, redirect policy, and other settings, create a Client
+	// A Client is an HTTP client
+	client := &http.Client{}
+
+	// Send the request via a client
+	// Do sends an HTTP request and returns an HTTP response
+	resp, err := client.Do(req)
+	if err != nil {
+		return results, err
 	}
+
+	// Callers should close resp.Body when done reading from it
+	// Defer the closing of the body
+	defer resp.Body.Close()
+
+	// Use json.Decode for reading streams of JSON data
+	err = json.NewDecoder(resp.Body).Decode(&results)
+	if err != nil {
+		return results, err
+	}
+
+	// The "OK" status indicates that no error has occurred, it means
+	// the address was analyzed and at least one geographic code was returned
+	if strings.ToUpper(results.Status) != "OK" {
+		// If the status is not "OK" check what status was returned
+		switch strings.ToUpper(results.Status) {
+		case "ZERO_RESULTS":
+			err = errors.New("No results found.")
+			break
+		case "OVER_QUERY_LIMIT":
+			err = errors.New("Over your quota.")
+			break
+		case "REQUEST_DENIED":
+			err = errors.New("Your request was denied.")
+			break
+		case "INVALID_REQUEST":
+			err = errors.New("Probably the query is missing.")
+			break
+		case "UNKNOWN_ERROR":
+			err = errors.New("Server error. Please, try again.")
+			break
+		default:
+			break
+		}
+	}
+	return results, err
+}
+
+// Geocoding function is used to convert an Address structure
+// to a Location structure (latitude and longitude)
+var API_KEY = "AIzaSyA2r99yOzOMfMDRk0YxKkvzrQTeWuzfncY"
+func Geocoding(address Address) (Location, error) {
+	var location Location
+	// Convert whitespaces to +
+	formattedAddress := address.FormatAddress()
+	formattedAddress = strings.Replace(string(formattedAddress), " ", "+", -1)
+
+	// Create the URL based on the formated address
+	url := config.ThirdParty.GoogleMapsGeoCodeAPIUrl + "address=" + formattedAddress
+
+	if config.ThirdParty.GoogleMapsAPIKey != "" {
+		url += "&key=" + config.ThirdParty.GoogleMapsAPIKey
+	}
+
+	// Send the HTTP request and get the results
+	results, err := httpRequest(url)
+	if err != nil {
+		log.Println(err)
+		return location, err
+	}
+
+	// Get the results (latitude and longitude)
+	location.Latitude = results.Results[0].Geometry.Location.Lat
+	location.Longitude = results.Results[0].Geometry.Location.Lng
+
+	return location, nil
 }
 
 func calculateDistance(start, end []string) (result int, err error) {
