@@ -2,6 +2,7 @@ package util
 
 import (
 	"rumah_resep/config"
+	"rumah_resep/models"
 
 	"github.com/labstack/gommon/log"
 	"gorm.io/driver/mysql"
@@ -23,5 +24,5 @@ func MysqlDatabaseConnection(config *config.AppConfig) *gorm.DB {
 
 // Create Migration Here
 func DatabaseMigration(db *gorm.DB) {
-
+	db.AutoMigrate(models.User{})
 }
