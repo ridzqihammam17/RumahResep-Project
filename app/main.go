@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
+	"rumah_resep/api/middlewares"
+	"rumah_resep/api/router"
 	"rumah_resep/config"
 	"rumah_resep/models"
 	"rumah_resep/util"
 
-	authController "rumah_resep/api/controllers/auth"
-  cartControllers "rumah_resep/api/controllers/carts"
-	"rumah_resep/models"
-	"rumah_resep/util"
-	"rumah_resep/api/middlewares"
-	"rumah_resep/api/router"
+	authControllers "rumah_resep/api/controllers/auth"
+	cartControllers "rumah_resep/api/controllers/carts"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -31,7 +29,6 @@ func main() {
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
 	newAuthController := authControllers.NewAuthController(userModel)
-
 
 	//create echo http with log
 	e := echo.New()

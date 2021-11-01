@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-
 func CreateToken(userId int, role string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
@@ -18,6 +17,12 @@ func CreateToken(userId int, role string) (string, error) {
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(constants.SECRET_JWT))
+}
+
+func LoggerMiddlewares(e *echo.Echo) {
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `[${time_rfc3339}] ${status} ${method} ${host} ${path} ${latency_human}` + "\n",
+	}))
 }
 
 func ExtractTokenUser(c echo.Context) (int, string) {
