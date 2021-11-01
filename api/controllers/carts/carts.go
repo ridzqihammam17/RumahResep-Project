@@ -210,43 +210,45 @@ func (controller *CartController) GetCartController(c echo.Context) error {
 	})
 }
 
-// func (controller *CartController) DeleteCartController(c echo.Context) error {
-// 	//convert cart id
-// 	cartId, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-// 			"message": "Invalid cart id",
-// 		})
-// 	}
+func (controller *CartController) DeleteCartController(c echo.Context) error {
+	//convert cart id
+	id, _ := strconv.Atoi(c.Param("id"))
 
-// 	//check is cart id exist on table cart
-// 	//var cart models.Cart
-// 	checkCartId, err := controller.cartModel.CheckCartId(cartId)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-// 			"message":     "Can't find cart",
-// 			"checkCartId": checkCartId,
-// 		})
-// 	}
+	// get id user & role login
+	userId, role := middlewares.ExtractTokenUser(c)
+	fmt.Println(userId, role)
+	// check role is customer
+	if role != "customer" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Role not Customer",
+		})
+	}
+	// listCart, _ := controller.cartModel.GetCartById(userId) //get cart by id
+	// recipes, _ := controller.cartDetailModel.GetListRecipeCart(id) //get all recipes based on cart id
 
-// 	//delete cart and all recipes included on it
-// 	deletedCart, _ := controller.cartModel.DeleteCart(cartId)
+	// custom data cart for body response
+	var newCart models.Cart
+	c.Bind(&newCart)
+	outputCart := models.Cart{
+		// "ID": listCart.ID,
+		// "customers_id":        listCart.CustomersID,
+		// "payment_methods_id":  listCart.PaymentMethodsID,
+		// "status_transactions": listCart.StatusTransactions,
+		TotalQuantity: 0,
+		TotalPrice:    0,
+		// "customer_id":    listCart.UserID,
+		// "CreatedAt":           listCart.CreatedAt,
+		// "UpdatedAt":           listCart.UpdatedAt,
+		// "DeletedAt":           listCart.DeletedAt,
+	}
+	// newTotalPrice, _ := controller.cartModel.GetTotalPrice(userId)
+	// newTotalQty, _ := controller.cartModel.GetTotalQty(userId)
+	// fmt.Println(newTotalPrice, newTotalQty)
+	newCartq, _ := controller.cartModel.UpdateTotalCart(outputCart, id)
 
-// 	//custom output data cart for body response
-// 	outputCart := map[string]interface{}{
-// 		"ID": deletedCart.ID,
-// 		// "customers_id":        deletedCart.CustomersID,
-// 		// "payment_methods_id":  deletedCart.PaymentMethodsID,
-// 		"status_transactions": deletedCart.StatusTransactions,
-// 		"total_quantity":      deletedCart.TotalQuantity,
-// 		"total_price":         deletedCart.TotalPrice,
-// 		"CreatedAt":           deletedCart.CreatedAt,
-// 		"UpdatedAt":           deletedCart.UpdatedAt,
-// 		"DeletedAt":           deletedCart.DeletedAt,
-// 	}
-
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"status":       "Delete cart success",
-// 		"Deleted Cart": outputCart,
-// 	})
-// }
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"cart": newCartq,
+		// "cartDetails": newCartDetail,
+		"status": "Delete cart success",
+	})
+}

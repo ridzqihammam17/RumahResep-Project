@@ -28,7 +28,7 @@ type CartModel interface {
 	UpdateTotalCart(cart Cart, cartId int) (Cart, error)
 	CheckCartId(cartId int) (interface{}, error)
 	GetCartById(id int) (Cart, error)
-	// DeleteCart(cartId int) (cart Cart, err error)
+	DeleteCart(cart Cart, cartId int) (Cart, error)
 }
 
 func (m *GormCartModel) CreateCart(cart Cart) (Cart, error) {
@@ -114,9 +114,22 @@ func (m *GormCartModel) GetCartById(id int) (Cart, error) {
 }
 
 //delete cart
-func (m *GormCartModel) DeleteCart(cartId int) (cart Cart, err error) {
+func (m *GormCartModel) DeleteCart(newCart Cart, cartId int) (Cart, error) {
 
-	if err := m.db.Find(&cart, "id=?", cartId).Unscoped().Delete(&cart).Error; err != nil {
+	// if err := m.db.Find(&cart, "id=?", cartId).Unscoped().Delete(&cart).Error; err != nil {
+	// 	return cart, err
+	// }
+	// return cart, nil
+	var cart Cart
+
+	if err := m.db.Find(&cart, cartId).Error; err != nil {
+		return cart, err
+	}
+
+	cart.TotalQuantity = newCart.TotalQuantity
+	cart.TotalPrice = newCart.TotalPrice
+
+	if err := m.db.Save(&cart).Error; err != nil {
 		return cart, err
 	}
 	return cart, nil
