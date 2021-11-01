@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -132,46 +133,47 @@ func (controller *CartController) CreateCartController(c echo.Context) error {
 // 	return newCart.TotalQuantity, newCart.TotalPrice
 // }
 
-// func (controller *CartController) GetCartController(c echo.Context) error {
-// 	//convert cart_id
-// 	id, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-// 			"message": "Invalid id cart",
-// 		})
-// 	}
-// 	//is cart id exist
-// 	var cart models.Cart
-// 	checkCartId, err := controller.cartModel.CheckCartId(cart.ID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-// 			"message":       "Cant find cart id",
-// 			"checkRecipeId": checkCartId,
-// 		})
-// 	}
+func (controller *CartController) GetCartController(c echo.Context) error {
+	//convert cart_id
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid id cart",
+		})
+	}
+	//is cart id exist
+	// var cart models.Cart
+	checkCartId, err := controller.cartModel.CheckCartId(int(id))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":       "Cant find cart id",
+			"checkRecipeId": checkCartId,
+		})
+	}
 
-// 	listCart, _ := controller.cartModel.GetCartById(id)            //get cart by id
-// 	recipes, _ := controller.cartDetailModel.GetListRecipeCart(id) //get all recipes based on cart id
+	listCart, _ := controller.cartModel.GetCartById(id) //get cart by id
+	// recipes, _ := controller.cartDetailModel.GetListRecipeCart(id) //get all recipes based on cart id
 
-// 	//custom data cart for body response
-// 	outputCart := map[string]interface{}{
-// 		"ID": listCart.ID,
-// 		// "customers_id":        listCart.CustomersID,
-// 		// "payment_methods_id":  listCart.PaymentMethodsID,
-// 		"status_transactions": listCart.StatusTransactions,
-// 		"total_quantity":      listCart.TotalQuantity,
-// 		"total_price":         listCart.TotalPrice,
-// 		"CreatedAt":           listCart.CreatedAt,
-// 		"UpdatedAt":           listCart.UpdatedAt,
-// 		"DeletedAt":           listCart.DeletedAt,
-// 	}
+	//custom data cart for body response
+	outputCart := map[string]interface{}{
+		"ID": listCart.ID,
+		// "customers_id":        listCart.CustomersID,
+		// "payment_methods_id":  listCart.PaymentMethodsID,
+		// "status_transactions": listCart.StatusTransactions,
+		"total_quantity": listCart.TotalQuantity,
+		"total_price":    listCart.TotalPrice,
+		"customer_id":    listCart.UserID,
+		// "CreatedAt":           listCart.CreatedAt,
+		// "UpdatedAt":           listCart.UpdatedAt,
+		// "DeletedAt":           listCart.DeletedAt,
+	}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"cart":    outputCart,
-// 		"recipes": recipes,
-// 		"status":  "Success get all recipes by cart id",
-// 	})
-// }
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"cart": outputCart,
+		// "recipes": recipes,
+		"status": "Success get all recipes by cart id",
+	})
+}
 
 // func (controller *CartController) DeleteCartController(c echo.Context) error {
 // 	//convert cart id

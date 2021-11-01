@@ -24,4 +24,5 @@ func Route(
 	jwtMiddleware := middleware.JWT([]byte(constants.SECRET_JWT))
 
 	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
+	e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
 }

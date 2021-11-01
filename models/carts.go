@@ -26,8 +26,8 @@ type CartModel interface {
 	// GetTotalPrice(cartId int) (int, error)
 	// GetTotalQty(cartId int) (int, error)
 	// UpdateTotalCart(cartId int, newTotalPrice int, newTotalQty int) (Cart, error)
-	// CheckCartId(cartId int) (interface{}, error)
-	// GetCartById(id int) (Cart, error)
+	CheckCartId(cartId int) (interface{}, error)
+	GetCartById(id int) (Cart, error)
 	// DeleteCart(cartId int) (cart Cart, err error)
 }
 
