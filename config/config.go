@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 //AppConfig Application configuration
@@ -19,8 +17,8 @@ type AppConfig struct {
 }
 
 type ThirdPartyConfig struct {
-	GoogleMapsAPIKey string
-	GoogleMapsAPIUrl string
+	GoogleMapsAPIKey        string
+	GoogleMapsAPIUrl        string
 	GoogleMapsGeoCodeAPIUrl string
 }
 type HTTPServerConfig struct {
@@ -40,13 +38,7 @@ var ThirdParty ThirdPartyConfig
 func GetConfig() *AppConfig {
 	lock.Lock()
 	defer lock.Unlock()
-	HTTPServer = HTTPServerConfig{
-		Addr:            viper.GetString("HTTPServer.Addr"),
-		ShutdownTimeout: time.Second * viper.GetDuration("HTTPServer.ShutdownTimeout"),
-		ReadTimeout:     time.Second * viper.GetDuration("HTTPServer.ReadTimeout"),
-		WriteTimeout:    time.Second * viper.GetDuration("HTTPServer.WriteTimeout"),
-		IdleTimeout:     time.Second * viper.GetDuration("HTTPServer.IdleTimeout"),
-	}
+
 	if appConfig == nil {
 		appConfig = InitConfig()
 	}
@@ -73,16 +65,11 @@ func InitConfig() *AppConfig {
 	defaultConfig.Database.Driver = "mysql"
 	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/db-rumah-resep?charset=utf8&parseTime=True&loc=Local")
 
-	return &defaultConfig
-}
-
-func InitGMapsConfig() {
-
-	// Define the Geocode API URL as a constant
-
 	ThirdParty = ThirdPartyConfig{
-		GoogleMapsAPIKey: "",
-		GoogleMapsAPIUrl: "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s",
-		GoogleMapsGeoCodeAPIUrl: "https://maps.googleapis.com/maps/api/geocode/json?",
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey",""),
+		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl","https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
+		GoogleMapsGeoCodeAPIUrl:  getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?") ,
 	}
+
+	return &defaultConfig
 }
