@@ -81,7 +81,7 @@ func InitGMapsConfig() {
 	// Define the Geocode API URL as a constant
 
 	ThirdParty = ThirdPartyConfig{
-		GoogleMapsAPIKey: "AIzaSyA2r99yOzOMfMDRk0YxKkvzrQTeWuzfncY",
+		GoogleMapsAPIKey: "",
 		GoogleMapsAPIUrl: "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s",
 		GoogleMapsGeoCodeAPIUrl: "https://maps.googleapis.com/maps/api/geocode/json?",
 	}
