@@ -3,6 +3,7 @@ package models
 import (
 	"rumah_resep/api/middlewares"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +32,22 @@ type UserModel interface {
 	Login(email, password string) (User, error)
 }
 
+// ------------------------------------------------------------------
+// Start Password Hashing
+// ------------------------------------------------------------------
+
+// ------------------------------------------------------------------
+// End Password Hashing
+// ------------------------------------------------------------------
+
 func (m *GormUserModel) Register(user User) (User, error) {
+	// Encrypt Password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+	user.Password = string(hashedPassword)
+
 	if err := m.db.Save(&user).Error; err != nil {
 		return user, err
 	}
@@ -42,7 +58,13 @@ func (m *GormUserModel) Login(email, password string) (User, error) {
 	var user User
 	var err error
 
-	if err = m.db.Where("email = ? AND password = ?", email, password).First(&user).Error; err != nil {
+	if err = m.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return user, err
+	}
+
+	// Start Checking Hash Password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
 		return user, err
 	}
 
