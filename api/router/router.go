@@ -3,6 +3,7 @@ package router
 import (
 	"rumah_resep/api/controllers/auth"
 	"rumah_resep/api/controllers/carts"
+	"rumah_resep/api/controllers/recipes"
 	"rumah_resep/api/controllers/categories"
 	"rumah_resep/constants"
 
@@ -14,6 +15,7 @@ func Route(
 	e *echo.Echo,
 	authController *auth.AuthController,
 	cartController *carts.CartController,
+	recipeController *recipes.RecipeController,
 	categoryController *categories.CategoryController,
 ) {
 	// ------------------------------------------------------------------
@@ -25,13 +27,22 @@ func Route(
 	// Auth JWT
 	jwtMiddleware := middleware.JWT([]byte(constants.SECRET_JWT))
 
-	// ------------------------------------------------------------------
+  // ------------------------------------------------------------------
 	// Carts
 	// ------------------------------------------------------------------
 	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
 	e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
 	e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
 	e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
+
+
+	// Recipe
+	e.GET("/api/recipes", recipeController.GetAllRecipeController, jwtMiddleware)
+	e.GET("/api/recipes/:recipeId", recipeController.GetRecipeByIdController, jwtMiddleware)
+	e.POST("/api/recipes", recipeController.CreateRecipeController, jwtMiddleware)
+	e.PUT("/api/recipes/:recipeId", recipeController.UpdateRecipeController, jwtMiddleware)
+	e.DELETE("/api/recipes/:recipeId", recipeController.DeleteRecipeController, jwtMiddleware)
+	e.GET("/api/recipes/category/:categoryId", recipeController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Categories
