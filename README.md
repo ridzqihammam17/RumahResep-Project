@@ -22,5 +22,5 @@ Final Project-based Task by Alterra Academy
 - Install Go and MySQL/XAMPP
 - Clone this repository in your $PATH:
 ``
-$ git clone https://github.com/darienkentanu/Restful-API-Project.git
+$ git clone https://github.com/ridzqihammam17/RumahResep-Project.git
 ``
