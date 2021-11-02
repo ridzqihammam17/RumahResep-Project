@@ -5,7 +5,9 @@ import (
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
 	"strconv"
+	"strings"
 
+	// "github.com/gopherjs/gopherjs/compiler/natives/src/strings"
 	"github.com/labstack/echo/v4"
 )
 
@@ -132,12 +134,19 @@ func (controller *RecipeController) DeleteRecipeController(c echo.Context) error
 }
 
 func (controller *RecipeController) GetRecipeByCategoryIdController(c echo.Context) error {
-	categoryId, err := strconv.Atoi(c.Param("categoryId"))
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+	categoryId := strings.Split(c.Param("categoryId"), ",")
+	var categoryName []int
+	for _, v := range categoryId {
+		value, _ := strconv.Atoi(v)
+		categoryName = append(categoryName, value)
 	}
 
-	recipe, err := controller.recipeModel.GetRecipeByCategoryId(categoryId)
+	// fmt.Println(c.Param("categoryId"))
+	// if err != nil {
+	// 	return c.String(http.StatusBadRequest, "Bad Request")
+	// }
+
+	recipe, err := controller.recipeModel.GetRecipeByCategoryId(categoryName)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
