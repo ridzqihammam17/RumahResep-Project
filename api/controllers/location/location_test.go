@@ -35,7 +35,7 @@ func TestValidateLatLong(t *testing.T) {
 }
 
 func TestCalculateDistance(t *testing.T) {
-	config.InitGMapsConfig()
+	config.InitConfig()
 	tt := struct {
 		start, end []string
 		expected   int
@@ -53,58 +53,42 @@ func TestCalculateDistance(t *testing.T) {
 		t.Errorf("unexpected result: got %v", result)
 	}
 }
-func TestFormatAddress(t *testing.T){
-	var address1 Address
-	var address2 Address
-	var address3 Address
-	var address4 Address
+func TestFormatAddress(t *testing.T) {
+	var address1 string
+	var address2 string
+	var address3 string
+	var address4 string
 
-	address2 = Address{
-		Street:  "Jl. Pemuda",
-		Number:  6,
-		City:    "East Jakarta",
-		Country: "Indonesia",
-	}
+	address2 = "Jl. Pemuda 6, East Jakarta, Indonesia"
 
-	address3 = Address{
-		Street:     "Jl. Pemuda",
-		Number:     6,
-		District:   "Jati",
-		City:       "East Jakarta",
-		State:      "DKI Jakarta",
-		Country:    "Indonesia",
-		PostalCode: "13220",
-	}
+	address3 = "Jl. Pemuda 6, Jati, East Jakarta, DKI Jakarta, Indonesia, 13220"
 
-	address4 = Address{
-		Number: 6,
-	}
+	address4 = "6"
 
 	// Table tests
 	var tTests = []struct {
-		address          Address
-		formattedAddress string
+		address         string
+		addressReceived string
 	}{
 		{address1, ""},
 		{address2, "6, Jl. Pemuda, East Jakarta, Indonesia"},
-		{address3, "6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"},
-		{address4, "6"},
+		{address3, "6"},
+		{address4, "6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"},
 	}
 
 	// Test with all values from the tTests
 	for _, pair := range tTests {
-		formattedAddress := pair.address.FormatAddress()
 
-		if formattedAddress != pair.formattedAddress {
-			t.Error("Expected:", pair.formattedAddress,
-				"Received:", formattedAddress)
+		if pair.addressReceived != pair.address {
+			t.Error("Expected:", pair.address,
+				"Received:", pair.addressReceived)
 		}
 	}
 }
 func TestGeocoding(t *testing.T) {
-	config.InitGMapsConfig()
-	var address1 Address
-	var address2 Address
+	config.InitConfig()
+	var address1 string
+	var address2 string
 
 	var location1 Location
 	var location2 Location
@@ -115,23 +99,15 @@ func TestGeocoding(t *testing.T) {
 	}
 
 	location2 = Location{
-		Latitude: -6.1917111,
+		Latitude:  -6.1917111,
 		Longitude: 106.8897306,
 	}
 
-	address2 = Address{
-		Street:     "Jl. Pemuda",
-		Number:     6,
-		District:   "Jati",
-		City:       "East Jakarta",
-		State:      "DKI Jakarta",
-		Country:    "Indonesia",
-		PostalCode: "13220",
-	}
+	address2 = "6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"
 
 	// Table tests
 	var tTests = []struct {
-		address  Address
+		address  string
 		location Location
 		err      error
 	}{

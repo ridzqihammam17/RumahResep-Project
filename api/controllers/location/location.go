@@ -39,7 +39,6 @@ type Location struct {
 	Longitude float64
 }
 
-
 var re = regexp.MustCompile(`^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$`)
 
 func validateLatLong(latitude, longitude string) bool {
@@ -139,11 +138,11 @@ func httpRequest(url string) (models.Results, error) {
 
 // Geocoding function is used to convert an Address structure
 // to a Location structure (latitude and longitude)
-func Geocoding(address Address) (Location, error) {
+func Geocoding(address string) (Location, error) {
 	var location Location
 	// Convert whitespaces to +
-	formattedAddress := address.FormatAddress()
-	formattedAddress = strings.Replace(string(formattedAddress), " ", "+", -1)
+
+	formattedAddress := strings.Replace(string(address), " ", "+", -1)
 
 	// Create the URL based on the formated address
 	url := config.ThirdParty.GoogleMapsGeoCodeAPIUrl + "address=" + formattedAddress
@@ -227,4 +226,3 @@ func calculateDistance(start, end []string) (result int, err error) {
 
 	return (int)(value), nil
 }
-
