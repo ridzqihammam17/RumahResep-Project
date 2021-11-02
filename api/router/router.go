@@ -4,6 +4,7 @@ import (
 	"rumah_resep/api/controllers/auth"
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/recipes"
+	"rumah_resep/api/controllers/categories"
 	"rumah_resep/constants"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,7 @@ func Route(
 	authController *auth.AuthController,
 	cartController *carts.CartController,
 	recipeController *recipes.RecipeController,
+	categoryController *categories.CategoryController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -24,11 +26,15 @@ func Route(
 
 	// Auth JWT
 	jwtMiddleware := middleware.JWT([]byte(constants.SECRET_JWT))
+
+  // ------------------------------------------------------------------
 	// Carts
+	// ------------------------------------------------------------------
 	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
 	e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
 	e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
 	e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
+
 
 	// Recipe
 	e.GET("/api/recipes", recipeController.GetAllRecipeController, jwtMiddleware)
@@ -39,8 +45,12 @@ func Route(
 	e.GET("/api/recipes/category/:categoryId", recipeController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
-	// Admin Role
+	// Categories
 	// ------------------------------------------------------------------
-	eAdmin := e.Group("/api/admin")
-	eAdmin.Use(middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/categories", categoryController.GetAllCategoryController, jwtMiddleware)
+	e.POST("/api/categories", categoryController.InsertCategoryController, jwtMiddleware)
+	e.GET("/api/categories/:id", categoryController.GetCategoryController, jwtMiddleware)
+	e.PUT("/api/categories/:id", categoryController.EditCategoryController, jwtMiddleware)
+	e.DELETE("/api/categories/:id", categoryController.DeleteCategoryController, jwtMiddleware)
+
 }

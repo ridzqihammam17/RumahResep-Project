@@ -7,6 +7,27 @@ import (
 	echo "github.com/labstack/echo/v4"
 )
 
+// ------------------------------------------------------------------
+// Start Request
+// ------------------------------------------------------------------
+
+type RegisterUserRequest struct {
+	Name     string `json:"name" form:"name"`
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+	Gender   string `json:"gender" form:"gender"`
+	Role     string `json:"role" form:"role"`
+}
+
+type LoginUserRequest struct {
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+}
+
+// ------------------------------------------------------------------
+// End Request
+// ------------------------------------------------------------------
+
 type AuthController struct {
 	userModel models.UserModel
 }
@@ -18,7 +39,7 @@ func NewAuthController(userModel models.UserModel) *AuthController {
 }
 
 func (controller *AuthController) RegisterUserController(c echo.Context) error {
-	var userRequest models.User
+	var userRequest RegisterUserRequest
 
 	if err := c.Bind(&userRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -54,7 +75,7 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 }
 
 func (controller *AuthController) LoginUserController(c echo.Context) error {
-	var userRequest models.User
+	var userRequest LoginUserRequest
 
 	if err := c.Bind(&userRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -75,6 +96,9 @@ func (controller *AuthController) LoginUserController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"token": user.Token,
+		"success": true,
+		"code":    200,
+		"message": "Login Success",
+		"token":   user.Token,
 	})
 }
