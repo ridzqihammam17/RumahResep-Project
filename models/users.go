@@ -32,14 +32,6 @@ type UserModel interface {
 	Login(email, password string) (User, error)
 }
 
-// ------------------------------------------------------------------
-// Start Password Hashing
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
-// End Password Hashing
-// ------------------------------------------------------------------
-
 func (m *GormUserModel) Register(user User) (User, error) {
 	// Encrypt Password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
