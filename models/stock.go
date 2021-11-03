@@ -21,7 +21,7 @@ type StockModel interface {
 	CreateStockUpdate(stock Stock) (Stock, error)
 }
 
-func (m *GormIngredientModel) CreateStockUpdate(stock Stock) (Stock, error) {
+func (m *GormStockModel) CreateStockUpdate(stock Stock) (Stock, error) {
 	if err := m.db.Save(&stock).Error; err != nil {
 		return stock, err
 	}
