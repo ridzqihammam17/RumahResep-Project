@@ -98,7 +98,7 @@ func (controller *AuthController) LoginUserController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Login Success",
+		"message": "Success Login",
 		"token":   user.Token,
 	})
 }
