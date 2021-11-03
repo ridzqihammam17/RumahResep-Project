@@ -21,6 +21,7 @@ type ThirdPartyConfig struct {
 	GoogleMapsAPIUrl        string
 	GoogleMapsGeoCodeAPIUrl string
 }
+
 type HTTPServerConfig struct {
 	Addr            string
 	ShutdownTimeout time.Duration
@@ -31,8 +32,12 @@ type HTTPServerConfig struct {
 
 //HTTPServer httpServer config
 var HTTPServer HTTPServerConfig
+
 var lock = &sync.Mutex{}
 var appConfig *AppConfig
+var ThirdParty ThirdPartyConfig
+
+// -- GeoCoding and MapsConfig
 var ThirdParty ThirdPartyConfig
 
 func GetConfig() *AppConfig {
@@ -63,12 +68,18 @@ func InitConfig() *AppConfig {
 
 	defaultConfig.Port = httpPort
 	defaultConfig.Database.Driver = "mysql"
-	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/db-rumah-resep?charset=utf8&parseTime=True&loc=Local")
+	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
 
 	ThirdParty = ThirdPartyConfig{
-		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey","AIzaSyAfF0h3oFhZS23os2XgPF8OIxTxKtkD8qI"),
-		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl","https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
-		GoogleMapsGeoCodeAPIUrl:  getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?") ,
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),
+		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
+		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
+	}
+
+	ThirdParty = ThirdPartyConfig{
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", "AIzaSyAfF0h3oFhZS23os2XgPF8OIxTxKtkD8qI"),
+		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
+		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
 	}
 
 	return &defaultConfig
