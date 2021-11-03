@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	location "rumah_resep/api/controllers/location"
 	"rumah_resep/models"
 
 	echo "github.com/labstack/echo/v4"
@@ -50,13 +51,24 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 		})
 	}
 
+	getLocation, errLocation := location.Geocoding(userRequest.Address)
+	if errLocation != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
+	}
+
 	user := models.User{
-		Name:     userRequest.Name,
-		Email:    userRequest.Email,
-		Gender:   userRequest.Gender,
-		Password: userRequest.Password,
-		Address:  userRequest.Address,
-		Role:     userRequest.Role,
+		Name:      userRequest.Name,
+		Email:     userRequest.Email,
+		Gender:    userRequest.Gender,
+		Password:  userRequest.Password,
+		Address:   userRequest.Address,
+		Latitude:  getLocation.Latitude,
+		Longitude: getLocation.Longitude,
+		Role:      userRequest.Role,
 	}
 
 	_, err := controller.userModel.Register(user)
