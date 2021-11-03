@@ -58,7 +58,7 @@ func initConfig() *AppConfig {
 	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
 
 	ThirdParty = ThirdPartyConfig{
-		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", "AIzaSyAfF0h3oFhZS23os2XgPF8OIxTxKtkD8qI"),
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),
 		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
 		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
 	}
