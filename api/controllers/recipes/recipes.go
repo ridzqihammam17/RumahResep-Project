@@ -11,26 +11,34 @@ import (
 )
 
 type RecipeController struct {
-	recipeModel models.RecipeModel
+	recipesCategoriesModel models.RecipeCategoriesModel
+	recipeModel            models.RecipeModel
+	categoryModel          models.CategoryModel
 }
 
-func NewRecipeController(recipeModel models.RecipeModel) *RecipeController {
+func NewRecipeController(
+	recipesCategoriesModel models.RecipeCategoriesModel,
+	recipeModel models.RecipeModel,
+	categoryModel models.CategoryModel) *RecipeController {
 	return &RecipeController{
+		recipesCategoriesModel,
 		recipeModel,
+		categoryModel,
 	}
 }
 
 func (controller *RecipeController) CreateRecipeController(c echo.Context) error {
 	//bind recipe from request body
 	var recipe models.Recipe
+	var user models.User
 	if err := c.Bind(&recipe); err != nil {
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 
 	//check role admin or not
-	_, role := middlewares.ExtractTokenUser(c)
-	if role != "admin" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+	_, user.Role = middlewares.ExtractTokenUser(c)
+	if user.Role != "admin" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
 			"message": "Role not Admin",
 		})
 	}

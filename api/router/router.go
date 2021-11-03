@@ -44,7 +44,7 @@ func Route(
 	e.POST("/api/recipes", recipeController.CreateRecipeController, jwtMiddleware)
 	e.PUT("/api/recipes/:recipeId", recipeController.UpdateRecipeController, jwtMiddleware)
 	e.DELETE("/api/recipes/:recipeId", recipeController.DeleteRecipeController, jwtMiddleware)
-	e.GET("/api/recipes/category/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
+	// e.GET("/api/recipes/category/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Categories
@@ -54,5 +54,9 @@ func Route(
 	e.GET("/api/categories/:id", categoryController.GetCategoryController, jwtMiddleware)
 	e.PUT("/api/categories/:id", categoryController.EditCategoryController, jwtMiddleware)
 	e.DELETE("/api/categories/:id", categoryController.DeleteCategoryController, jwtMiddleware)
+
+	// Recipe Categories
+	e.POST("api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
+	e.GET("/api/recipes/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 }

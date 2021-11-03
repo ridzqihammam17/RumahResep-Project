@@ -35,9 +35,9 @@ func main() {
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
 	newAuthController := authControllers.NewAuthController(userModel)
-	newRecipeController := recipeControllers.NewRecipeController(recipeModel)
+	newRecipeController := recipeControllers.NewRecipeController(recipesCategoriesModel, recipeModel, categoryModel)
 	newCategoryController := categoryControllers.NewCategoryController(categoryModel)
-	newRecipesCategoriesController := recipeCategoriesControllers.NewRecipesCategoriesController(recipesCategoriesModel)
+	newRecipesCategoriesController := recipeCategoriesControllers.NewRecipesCategoriesController(recipesCategoriesModel, recipeModel, categoryModel)
 
 	//create echo http with log
 	e := echo.New()
