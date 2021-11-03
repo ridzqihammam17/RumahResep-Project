@@ -35,7 +35,9 @@ func Route(
 	e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
 	e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
 
+	// ------------------------------------------------------------------
 	// Recipe
+	// ------------------------------------------------------------------
 	e.GET("/api/recipes", recipeController.GetAllRecipeController, jwtMiddleware)
 	e.GET("/api/recipes/:recipeId", recipeController.GetRecipeByIdController, jwtMiddleware)
 	e.POST("/api/recipes", recipeController.CreateRecipeController, jwtMiddleware)
