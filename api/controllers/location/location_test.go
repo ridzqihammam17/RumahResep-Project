@@ -2,11 +2,13 @@ package location
 
 import (
 	"errors"
-	"github.com/magiconair/properties/assert"
 	"os"
 	"testing"
 
 	"rumah_resep/config"
+
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
