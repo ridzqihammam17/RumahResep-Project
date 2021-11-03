@@ -22,17 +22,24 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
+	// -- Create Connection
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 
+	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
 	db.AutoMigrate(&models.User{})
 
+	// -- Dummy Data
 	var newUser models.User
 	newUser.Name = "Testing Name"
 	newUser.Email = "testingmailt@mail.com"
 	newUser.Password = "generate111"
+	newUser.Address = "jl. barat lau no 1"
+	newUser.Gender = "laki"
+	newUser.Role = "admin"
 
+	// -- Dummy Data with Model
 	userModel := models.NewUserModel(db)
 	_, err := userModel.Register(newUser)
 	if err != nil {
@@ -41,31 +48,36 @@ func setup() {
 }
 
 func TestRegisterUserController(t *testing.T) {
-	setup()
+	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 	userModel := models.NewUserModel(db)
 	userController := NewAuthController(userModel)
 
-	e := echo.New()
-
+	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]string{
 		"name":     "Buddy",
 		"email":    "buddy@gmail.com",
 		"password": "generate111",
+		"address":  "jl barat daya no 5",
+		"gender":   "laki",
+		"role":     "admin",
 	})
 
+	// -- Setting Controller
+	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	context := e.NewContext(req, res)
 	context.SetPath("/api/register")
 
-	if err := userController.RegisterUserController(context); err != nil {
-		t.Errorf("Should'nt get error, get error: %s", err)
-	}
+	// -- Declare Controller
+	userController.RegisterUserController(context)
 
+	// -- Declare Response and Convert to JSON
 	type Response struct {
+		Success bool   `json:"success"`
 		Code    int    `json:"code"`
 		Message string `json:"message"`
 	}
@@ -73,31 +85,85 @@ func TestRegisterUserController(t *testing.T) {
 
 	json.Unmarshal(res.Body.Bytes(), &response)
 
+	assert.Equal(t, true, response.Success)
 	assert.Equal(t, 200, res.Code)
 	assert.Equal(t, "Success Register Account", response.Message)
 }
 
-func TestLoginUserController(t *testing.T) {
+func TestValidLoginUserController(t *testing.T) {
+	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 	userModel := models.NewUserModel(db)
 	userController := NewAuthController(userModel)
 
-	// // setting controller
+	// -- Input
+	reqBodyPost, _ := json.Marshal(map[string]string{
+		"email":    "buddy@gmail.com",
+		"password": "generate111",
+	})
+
+	// -- Setting Controller
 	e := echo.New()
-	reqBodyLogin, _ := json.Marshal(models.User{Email: "testingmailt@mail.com", Password: "generate111"})
-	loginreq := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyLogin))
-	loginreq.Header.Set("Content-Type", "application/json")
-	loginres := httptest.NewRecorder()
-	logincontext := e.NewContext(loginreq, loginres)
-	logincontext.SetPath("/api/login")
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	context := e.NewContext(req, res)
+	context.SetPath("/api/login")
 
-	if err := userController.LoginUserController(logincontext); err != nil {
-		t.Errorf("Should'nt get error, get error: %s", err)
+	// -- Declare Controller
+	userController.LoginUserController(context)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
 	}
+	var response Response
 
-	var c models.User
-	json.Unmarshal(loginres.Body.Bytes(), &c)
+	json.Unmarshal(res.Body.Bytes(), &response)
 
-	assert.Equal(t, 200, loginres.Code)
+	assert.Equal(t, true, response.Success)
+	assert.Equal(t, 200, res.Code)
+	assert.Equal(t, "Success Login", response.Message)
+}
+
+func TestInvalidLoginUserController(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnection(config)
+	userModel := models.NewUserModel(db)
+	userController := NewAuthController(userModel)
+
+	// -- Input
+	reqBodyPost, _ := json.Marshal(map[string]string{
+		"email":    "buddy@gmail.com",
+		"password": "generate112",
+	})
+
+	// -- Setting Controller
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	context := e.NewContext(req, res)
+	context.SetPath("/api/login")
+
+	// -- Declare Controller
+	userController.LoginUserController(context)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, "Bad Request", response.Message)
 }
