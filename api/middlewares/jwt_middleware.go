@@ -26,6 +26,17 @@ func LoggerMiddlewares(e *echo.Echo) {
 }
 
 func ExtractTokenUser(c echo.Context) (int, string) {
+	// fmt.Println(c.Get("user"))
+	// if temp := c.Get("user"); temp != nil {
+
+	// 	u := temp.(*jwt.Token)
+	// 	claims := u.Claims.(jwt.MapClaims)
+	// 	userId := int(claims["userId"].(float64))
+	// 	role := claims["role"].(string)
+	// 	return userId, role
+	// }
+	// return 0, ""
+
 	token := c.Get("user").(*jwt.Token)
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)

@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Category struct {
 	gorm.Model
-	Name string `json:"name" form:"name"`
+	Name    string    `json:"name" form:"name"`
+	Recipes []*Recipe `gorm:"many2many:recipe_categories" json:"recipes"`
 }
 
 type GormCategoryModel struct {

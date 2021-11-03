@@ -10,8 +10,9 @@ import (
 
 	authControllers "rumah_resep/api/controllers/auth"
 	cartControllers "rumah_resep/api/controllers/carts"
-	recipeControllers "rumah_resep/api/controllers/recipes"
 	categoryControllers "rumah_resep/api/controllers/categories"
+	recipeControllers "rumah_resep/api/controllers/recipes"
+	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -29,19 +30,21 @@ func main() {
 	userModel := models.NewUserModel(db)
 	recipeModel := models.NewRecipeModel(db)
 	categoryModel := models.NewCategoryModel(db)
+	recipesCategoriesModel := models.NewRecipesCategoriesModel(db)
 
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
 	newAuthController := authControllers.NewAuthController(userModel)
-	newRecipeController := recipeControllers.NewRecipeController(recipeModel)
+	newRecipeController := recipeControllers.NewRecipeController(recipesCategoriesModel, recipeModel, categoryModel)
 	newCategoryController := categoryControllers.NewCategoryController(categoryModel)
+	newRecipesCategoriesController := recipeCategoriesControllers.NewRecipesCategoriesController(recipesCategoriesModel, recipeModel, categoryModel)
 
 	//create echo http with log
 	e := echo.New()
 	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
-	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController)
+	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)

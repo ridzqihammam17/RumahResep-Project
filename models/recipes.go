@@ -1,8 +1,6 @@
 package models
 
 import (
-	"errors"
-
 	"gorm.io/gorm"
 )
 
@@ -11,8 +9,8 @@ type Recipe struct {
 	Name string `json:"name" form:"name"`
 
 	// many2many with category
-	// Categories []Category `gorm:"many2many:recipe_categories" json:"category" form:"category"`
-	Category int `json:"category" form:"category"`
+	Categories []*Category `gorm:"many2many:recipe_categories" json:"categories"`
+	// Category int `json:"category" form:"category"`
 }
 
 type GormRecipeModel struct {
@@ -29,7 +27,7 @@ type RecipeModel interface {
 	GetRecipeById(recipeId int) (Recipe, error)
 	UpdateRecipe(recipe Recipe, recipeId int) (Recipe, error)
 	DeleteRecipe(recipeId int) (Recipe, error)
-	GetRecipeByCategoryId(categoryId []int) ([]Recipe, error)
+	// GetRecipeByCategoryId(categoryId []int) ([]Recipe, error)
 }
 
 func (m *GormRecipeModel) CreateRecipe(recipe Recipe) (Recipe, error) {
@@ -62,7 +60,7 @@ func (m *GormRecipeModel) UpdateRecipe(recipe Recipe, recipeId int) (Recipe, err
 	}
 
 	newRecipe.Name = recipe.Name
-	newRecipe.Category = recipe.Category
+	// newRecipe.Category = recipe.Category
 
 	if err := m.db.Save(&newRecipe).Error; err != nil {
 		return newRecipe, err
@@ -82,15 +80,15 @@ func (m *GormRecipeModel) DeleteRecipe(recipeId int) (Recipe, error) {
 	return recipe, nil
 }
 
-func (m *GormRecipeModel) GetRecipeByCategoryId(categoryId []int) ([]Recipe, error) {
-	var recipe []Recipe
+// func (m *GormRecipeModel) GetRecipeByCategoryId(categoryId []int) ([]Recipe, error) {
+// 	var recipe []Recipe
 
-	if err := m.db.Find(&recipe, "category in ?", categoryId).Error; err != nil {
-		return recipe, err
-	}
-	if len(recipe) == 0 {
+// 	if err := m.db.Find(&recipe, "category in ?", categoryId).Error; err != nil {
+// 		return recipe, err
+// 	}
+// 	if len(recipe) == 0 {
 
-		return nil, errors.New("Data Not Found")
-	}
-	return recipe, nil
-}
+// 		return nil, errors.New("Data Not Found")
+// 	}
+// 	return recipe, nil
+// }
