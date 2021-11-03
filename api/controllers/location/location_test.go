@@ -2,10 +2,22 @@ package location
 
 import (
 	"errors"
+	"github.com/magiconair/properties/assert"
+	"os"
 	"testing"
 
 	"rumah_resep/config"
 )
+
+func TestMain(m *testing.M) {
+	setup()
+	os.Exit(m.Run())
+}
+
+func setup() {
+	// -- Create Connection
+	config.InitConfig()
+}
 
 func TestValidateLatLong(t *testing.T) {
 	tt := []struct {
@@ -48,10 +60,7 @@ func TestCalculateDistance(t *testing.T) {
 	if err != nil {
 		t.Errorf("calculateDistance error: %v", err)
 	}
-	expected := tt.expected
-	if result != expected {
-		t.Errorf("unexpected result: got %v", result)
-	}
+	assert.Equal(t, tt.expected, result)
 }
 func TestFormatAddress(t *testing.T) {
 	var address1 string
@@ -59,21 +68,21 @@ func TestFormatAddress(t *testing.T) {
 	var address3 string
 	var address4 string
 
-	address2 = "Jl. Pemuda 6, East Jakarta, Indonesia"
+	address2 = "6, Jl. Pemuda, East Jakarta, Indonesia"
 
-	address3 = "Jl. Pemuda 6, Jati, East Jakarta, DKI Jakarta, Indonesia, 13220"
+	address3 = "6, Jl. Pemuda, Jati, East Jakarta, DKI Jakarta, Indonesia, 13220"
 
 	address4 = "6"
 
 	// Table tests
 	var tTests = []struct {
-		address          string
+		address         string
 		addressReceived string
 	}{
-		{address1,""},
-		{address2,"6, Jl. Pemuda, East Jakarta, Indonesia",},
-		{address3,"6"},
-		{address4,"6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"},
+		{address1, ""},
+		{address2, "6, Jl. Pemuda, East Jakarta, Indonesia"},
+		{address3, "6, Jl. Pemuda, Jati, East Jakarta, DKI Jakarta, Indonesia, 13220"},
+		{address4, "6"},
 	}
 
 	// Test with all values from the tTests
@@ -103,7 +112,7 @@ func TestGeocoding(t *testing.T) {
 		Longitude: 106.8897306,
 	}
 
-	address2 = "6, Jl. Pemuda, Jati, 13220, East Jakarta, DKI Jakarta, Indonesia"
+	address2 = "6, Jl. Pemuda, Jati, East Jakarta, DKI Jakarta, Indonesia, 13220"
 
 	// Table tests
 	var tTests = []struct {
@@ -118,8 +127,7 @@ func TestGeocoding(t *testing.T) {
 	// Test with all values from the tTests
 	for _, pair := range tTests {
 		location, err := Geocoding(pair.address)
-
-		if pair.err != nil {
+		if err != nil {
 			if err == nil {
 				t.Error("Expected:", pair.err,
 					"Received: nil")
@@ -130,14 +138,7 @@ func TestGeocoding(t *testing.T) {
 					"Received:", err)
 			}
 		}
-		if location.Latitude != pair.location.Latitude {
-			t.Error("Expected:", pair.location.Latitude,
-				"Received:", location.Latitude)
-		}
-		if location.Longitude != pair.location.Longitude {
-			t.Error("Expected:", pair.location.Longitude,
-				"Received:", location.Longitude)
-		}
+		assert.Equal(t, pair.location, location)
 	}
 
 }
