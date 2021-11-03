@@ -16,6 +16,7 @@ type RegisterUserRequest struct {
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 	Gender   string `json:"gender" form:"gender"`
+	Address  string `json:"address" form:"address"`
 	Role     string `json:"role" form:"role"`
 }
 
@@ -54,6 +55,7 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 		Email:    userRequest.Email,
 		Gender:   userRequest.Gender,
 		Password: userRequest.Password,
+		Address:  userRequest.Address,
 		Role:     userRequest.Role,
 	}
 
