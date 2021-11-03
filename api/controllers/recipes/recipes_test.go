@@ -32,7 +32,7 @@ func setup() {
 	// preparate dummy data
 	var newRecipe models.Recipe
 	newRecipe.Name = "Soto"
-	newRecipe.Category = 1
+	// newRecipe.Category = 1
 
 	// recipe dummy data with model
 	recipeModel := models.NewRecipeModel(db)
@@ -63,7 +63,7 @@ func TestGetAllRecipeController(t *testing.T) {
 
 	assert.Equal(t, 200, res.Code)
 	assert.Equal(t, "Soto", b[0].Name)
-	assert.Equal(t, 1, b[0].Category)
+	// assert.Equal(t, 1, b[0].Category)
 }
 
 func TestGetRecipeByIdController(t *testing.T) {

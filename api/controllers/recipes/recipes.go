@@ -5,7 +5,6 @@ import (
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
 	"strconv"
-	"strings"
 
 	// "github.com/gopherjs/gopherjs/compiler/natives/src/strings"
 	"github.com/labstack/echo/v4"
@@ -38,8 +37,8 @@ func (controller *RecipeController) CreateRecipeController(c echo.Context) error
 
 	// input request body to newRecipe
 	newRecipe := models.Recipe{
-		Name:     recipe.Name,
-		Category: recipe.Category,
+		Name: recipe.Name,
+		// Category: recipe.Category,
 	}
 
 	// create recipe
@@ -98,8 +97,8 @@ func (controller *RecipeController) UpdateRecipeController(c echo.Context) error
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 	recipe := models.Recipe{
-		Name:     recipeRequest.Name,
-		Category: recipeRequest.Category,
+		Name: recipeRequest.Name,
+		// Category: recipeRequest.Category,
 	}
 
 	output, err := controller.recipeModel.UpdateRecipe(recipe, id)
@@ -133,26 +132,26 @@ func (controller *RecipeController) DeleteRecipeController(c echo.Context) error
 	return c.String(http.StatusOK, "Success Delete Recipe")
 }
 
-func (controller *RecipeController) GetRecipeByCategoryIdController(c echo.Context) error {
-	categoryId := strings.Split(c.Param("categoryId"), ",")
-	var categoryName []int
-	for _, v := range categoryId {
-		value, _ := strconv.Atoi(v)
-		categoryName = append(categoryName, value)
-	}
+// func (controller *RecipeController) GetRecipeByCategoryIdController(c echo.Context) error {
+// 	categoryId := strings.Split(c.Param("categoryId"), ",")
+// 	var categoryName []int
+// 	for _, v := range categoryId {
+// 		value, _ := strconv.Atoi(v)
+// 		categoryName = append(categoryName, value)
+// 	}
 
-	// fmt.Println(c.Param("categoryId"))
-	// if err != nil {
-	// 	return c.String(http.StatusBadRequest, "Bad Request")
-	// }
+// 	// fmt.Println(c.Param("categoryId"))
+// 	// if err != nil {
+// 	// 	return c.String(http.StatusBadRequest, "Bad Request")
+// 	// }
 
-	recipe, err := controller.recipeModel.GetRecipeByCategoryId(categoryName)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
-	}
+// 	recipe, err := controller.recipeModel.GetRecipeByCategoryId(categoryName)
+// 	if err != nil {
+// 		return c.String(http.StatusBadRequest, "Bad Request")
+// 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    recipe,
-		"message": "Success Get Recipe By Category ID",
-	})
-}
+// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 		"data":    recipe,
+// 		"message": "Success Get Recipe By Category ID",
+// 	})
+// }
