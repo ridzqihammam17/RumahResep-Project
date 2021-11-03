@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	location "rumah_resep/api/controllers/location"
 	"rumah_resep/models"
 
 	echo "github.com/labstack/echo/v4"
@@ -16,6 +17,7 @@ type RegisterUserRequest struct {
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 	Gender   string `json:"gender" form:"gender"`
+	Address  string `json:"address" form:"address"`
 	Role     string `json:"role" form:"role"`
 }
 
@@ -49,12 +51,24 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 		})
 	}
 
+	getLocation, errLocation := location.Geocoding(userRequest.Address)
+	if errLocation != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
+	}
+
 	user := models.User{
-		Name:     userRequest.Name,
-		Email:    userRequest.Email,
-		Gender:   userRequest.Gender,
-		Password: userRequest.Password,
-		Role:     userRequest.Role,
+		Name:      userRequest.Name,
+		Email:     userRequest.Email,
+		Gender:    userRequest.Gender,
+		Password:  userRequest.Password,
+		Address:   userRequest.Address,
+		Latitude:  getLocation.Latitude,
+		Longitude: getLocation.Longitude,
+		Role:      userRequest.Role,
 	}
 
 	_, err := controller.userModel.Register(user)
@@ -98,7 +112,7 @@ func (controller *AuthController) LoginUserController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Login Success",
+		"message": "Success Login",
 		"token":   user.Token,
 	})
 }

@@ -15,8 +15,17 @@ type AppConfig struct {
 	}
 }
 
+type ThirdPartyConfig struct {
+	GoogleMapsAPIKey        string
+	GoogleMapsAPIUrl        string
+	GoogleMapsGeoCodeAPIUrl string
+}
+
 var lock = &sync.Mutex{}
 var appConfig *AppConfig
+
+// -- GeoCoding and MapsConfig
+var ThirdParty ThirdPartyConfig
 
 func GetConfig() *AppConfig {
 	lock.Lock()
@@ -47,6 +56,12 @@ func initConfig() *AppConfig {
 	defaultConfig.Port = httpPort
 	defaultConfig.Database.Driver = "mysql"
 	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
+
+	ThirdParty = ThirdPartyConfig{
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),
+		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
+		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
+	}
 
 	return &defaultConfig
 }
