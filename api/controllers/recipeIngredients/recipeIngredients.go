@@ -3,6 +3,7 @@ package recipeingredients
 import (
 	"net/http"
 	"rumah_resep/models"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,11 +20,6 @@ func NewRecipeIngredientsController(recipeIngredientsModel models.RecipeIngredie
 		recipeModel,
 		ingredientModel,
 	}
-}
-
-type Response struct {
-	Data    interface{} `json:"menu"`
-	Message string      `json:"message"`
 }
 
 func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c echo.Context) error {
@@ -47,4 +43,35 @@ func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c 
 		"message": "Success Add Recipe Ingredient",
 	})
 
+}
+
+func (controller *RecipeIngredientsController) GetIngredientsByRecipeIdController(c echo.Context) error {
+	recipeId, _ := strconv.Atoi(c.Param("recipeId"))
+	ingredient, err := controller.ingredientModel.GetIngredientsByRecipeId(recipeId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"succuess": false,
+			"code":     400,
+			"message":  "Bad Request",
+		})
+	}
+
+	// type Response struct {
+	// 	Data    models.Ingredient `json:"data"`
+	// 	Message string            `json:"message"`
+	// }
+
+	// response := &Response{
+	// 	Data:    ingredient,
+	// 	Message: "Success Get Ingredient By Recipe Id",
+	// }
+
+	// var response Response
+	// fmt.Println(c.Param("recipeId"))
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"data":    ingredient,
+		"message": "Success Get Recipe By Category ID",
+	})
 }

@@ -1,7 +1,6 @@
 package ingredient
 
 import (
-	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
@@ -182,33 +181,4 @@ func (controller *IngredientController) DeleteIngredientController(c echo.Contex
 		return c.String(http.StatusNotFound, "Data Not Found")
 	}
 	return c.String(http.StatusOK, "Success Delete Recipe")
-}
-
-func (controller *IngredientController) GetIngredientsByRecipeIdController(c echo.Context) error {
-	fmt.Println(c.Param("recipeId"))
-	recipeId, _ := strconv.Atoi(c.Param("recipeId"))
-	fmt.Println(recipeId)
-	ingredient, err := controller.IngredientModel.GetIngredientsByRecipeId(recipeId)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
-	}
-	fmt.Println(ingredient)
-
-	// type Response struct {
-	// 	Data    models.Ingredient `json:"data"`
-	// 	Message string            `json:"message"`
-	// }
-
-	// response := &Response{
-	// 	Data:    ingredient,
-	// 	Message: "Success Get Ingredient By Recipe Id",
-	// }
-
-	// var response Response
-	// fmt.Println(c.Param("recipeId"))
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"menu":    ingredient,
-		"message": "Success Get Ingredient By Recipe Id",
-	})
-	// return c.JSON(http.StatusOK, response)
 }

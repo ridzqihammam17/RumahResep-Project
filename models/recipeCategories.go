@@ -39,6 +39,7 @@ func (m *GormRecipesCategoriesModel) AddRecipeCategories(recipeCategories Recipe
 func (m *GormRecipesCategoriesModel) GetRecipeByCategoryId(categoryId []int) ([]RecipeCategories, error) {
 	var recipe_categories []RecipeCategories
 
+	// if err := m.db.Raw("SELECT recipes.name FROM `recipes` left join recipe_categories ON categories.id=recipe_categories.category_id WHERE recipe_categories.recipe_id = ?",
 	if err := m.db.Find(&recipe_categories, "category_id", categoryId).Error; err != nil {
 		return recipe_categories, err
 	}

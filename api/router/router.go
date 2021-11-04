@@ -63,7 +63,7 @@ func Route(
 
 	// Recipe Categories
 	e.POST("/api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
-	e.GET("/api/recipes/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
+	e.GET("/api/recipe/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 	// Ingredients
 	e.GET("/api/ingredients", ingredientController.GetAllIngredientController, jwtMiddleware)
@@ -75,5 +75,5 @@ func Route(
 
 	// Recipe Ingredients
 	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
-	e.GET("/api/ingredients/recipe/:recipeId", ingredientController.GetIngredientsByRecipeIdController, jwtMiddleware)
+	e.GET("/api/ingredients/recipe/:recipeId", recipeIngredientsController.GetIngredientsByRecipeIdController, jwtMiddleware)
 }

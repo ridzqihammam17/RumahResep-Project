@@ -1,7 +1,6 @@
 package recipescategories
 
 import (
-	"fmt"
 	"net/http"
 	"rumah_resep/models"
 	"strconv"
@@ -73,7 +72,6 @@ func (controller *RecipesCategoriesController) GetRecipeByCategoryIdController(c
 		value, _ := strconv.Atoi(v)
 		categoryName = append(categoryName, value)
 	}
-	fmt.Println(categoryName)
 	recipe, err := controller.recipesCategoriesModel.GetRecipeByCategoryId(categoryName)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{

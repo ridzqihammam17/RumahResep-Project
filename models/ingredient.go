@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -31,7 +32,7 @@ type IngredientModel interface {
 	UpdateIngredient(ingredient Ingredient, ingredientId int) (Ingredient, error)
 	DeleteIngredient(ingredientId int) (Ingredient, error)
 	UpdateStock(ingredient Ingredient, ingredientId int) (Ingredient, error)
-	GetIngredientsByRecipeId(recipeId int) (string, error)
+	GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error)
 }
 
 func (m *GormIngredientModel) CreateIngredient(ingredient Ingredient) (Ingredient, error) {
@@ -98,10 +99,11 @@ func (m *GormIngredientModel) DeleteIngredient(ingredientId int) (Ingredient, er
 	return ingredient, nil
 }
 
-func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) (string, error) {
-	// var recipeIngredients []Ingredient
-	var recipeIngredients string
-	if err := m.db.Raw("SELECT ingredients.name FROM `ingredients` left join recipe_ingredients ON ingredients.id=recipe_ingredients.ingredient_id WHERE recipe_ingredients.recipe_id = 1").Error; err != nil {
+func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error) {
+	var recipeIngredients []RecipeIngredients
+	// var recipeIngredients string
+	// if err := m.db.Select("name").Find(&ingredients).Where()
+	if err := m.db.Raw("SELECT ingredients.name FROM `ingredients` left join recipe_ingredients ON ingredients.id=recipe_ingredients.ingredient_id WHERE recipe_ingredients.recipe_id = ?", "recipeId", recipeId).Error; err != nil {
 		return recipeIngredients, err
 	}
 	fmt.Println(recipeIngredients)
@@ -109,9 +111,9 @@ func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) (string, er
 	// if err := m.db.Find(&recipeIngredients, "recipe_id", recipeId).Error; err != nil {
 
 	// }
-	// if len(recipeIngredients) == 0 {
+	if len(recipeIngredients) == 0 {
 
-	// 	return nil, errors.New("Data Not Found")
-	// }
+		return nil, errors.New("Data Not Found")
+	}
 	return recipeIngredients, nil
 }
