@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"rumah_resep/config"
@@ -52,7 +51,11 @@ func TestRegisterUserController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 	userModel := models.NewUserModel(db)
-	userController := NewAuthController(userModel)
+	authController := NewAuthController(userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/register", authController.RegisterUserController)
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]string{
@@ -65,15 +68,10 @@ func TestRegisterUserController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/register", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/register")
-
-	// -- Declare Controller
-	userController.RegisterUserController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -95,7 +93,11 @@ func TestValidLoginUserController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 	userModel := models.NewUserModel(db)
-	userController := NewAuthController(userModel)
+	authController := NewAuthController(userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]string{
@@ -104,15 +106,10 @@ func TestValidLoginUserController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/login")
-
-	// -- Declare Controller
-	userController.LoginUserController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -134,7 +131,11 @@ func TestInvalidLoginUserController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnection(config)
 	userModel := models.NewUserModel(db)
-	userController := NewAuthController(userModel)
+	authController := NewAuthController(userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]string{
@@ -143,15 +144,10 @@ func TestInvalidLoginUserController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/login")
-
-	// -- Declare Controller
-	userController.LoginUserController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {

@@ -44,7 +44,6 @@ func AuthorizeAdmin(c echo.Context) bool {
 }
 
 func (controller *CategoryController) GetAllCategoryController(c echo.Context) error {
-
 	checkAuthorize := AuthorizeAdmin(c)
 	if !checkAuthorize {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{

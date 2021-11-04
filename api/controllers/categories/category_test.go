@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"rumah_resep/api/controllers/auth"
 	"rumah_resep/config"
+	"rumah_resep/constants"
 	"rumah_resep/models"
 	"rumah_resep/util"
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +68,11 @@ func TestValidGetAllCategoryController(t *testing.T) {
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
 	categoryController := NewCategoryController(categoryModel)
+
+	// -- Declare Route
 	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/categories", categoryController.GetAllCategoryController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -77,14 +82,10 @@ func TestValidGetAllCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	reqLogin := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
 	reqLogin.Header.Set("Content-Type", "application/json")
 	resLogin := httptest.NewRecorder()
-	contextLogin := e.NewContext(reqLogin, resLogin)
-	contextLogin.SetPath("/api/login")
-
-	// -- Declare Controller
-	authController.LoginUserController(contextLogin)
+	e.ServeHTTP(resLogin, reqLogin)
 
 	// -- Declare Response and Convert to JSON
 	type ResponseLogin struct {
@@ -105,15 +106,11 @@ func TestValidGetAllCategoryController(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req := httptest.NewRequest(echo.GET, "/api/categories", nil)
+	req.Header.Set("Authorization", fmt.Sprint("Bearer ", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/categories")
-
-	// -- Declare Controller
-	categoryController.GetAllCategoryController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -143,7 +140,11 @@ func TestValidGetCategoryController(t *testing.T) {
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
 	categoryController := NewCategoryController(categoryModel)
+
+	// -- Declare Route
 	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/categories/:id", categoryController.GetCategoryController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -153,14 +154,10 @@ func TestValidGetCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	reqLogin := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
 	reqLogin.Header.Set("Content-Type", "application/json")
 	resLogin := httptest.NewRecorder()
-	contextLogin := e.NewContext(reqLogin, resLogin)
-	contextLogin.SetPath("/api/login")
-
-	// -- Declare Controller
-	authController.LoginUserController(contextLogin)
+	e.ServeHTTP(resLogin, reqLogin)
 
 	// -- Declare Response and Convert to JSON
 	type ResponseLogin struct {
@@ -181,17 +178,11 @@ func TestValidGetCategoryController(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req := httptest.NewRequest(echo.GET, "/api/categories/1", nil)
+	req.Header.Set("Authorization", fmt.Sprint("Bearer ", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/categories/:id")
-	context.SetParamNames("id")
-	context.SetParamValues("1")
-
-	// -- Declare Controller
-	categoryController.GetCategoryController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -220,7 +211,11 @@ func TestValidInsertCategoryController(t *testing.T) {
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
 	categoryController := NewCategoryController(categoryModel)
+
+	// -- Declare Route
 	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.POST("/api/categories", categoryController.InsertCategoryController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -230,14 +225,10 @@ func TestValidInsertCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	reqLogin := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
 	reqLogin.Header.Set("Content-Type", "application/json")
 	resLogin := httptest.NewRecorder()
-	contextLogin := e.NewContext(reqLogin, resLogin)
-	contextLogin.SetPath("/api/login")
-
-	// -- Declare Controller
-	authController.LoginUserController(contextLogin)
+	e.ServeHTTP(resLogin, reqLogin)
 
 	// -- Declare Response and Convert to JSON
 	type ResponseLogin struct {
@@ -263,15 +254,11 @@ func TestValidInsertCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req := httptest.NewRequest(echo.POST, "/api/categories", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprint("Bearer ", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/categories")
-
-	// -- Declare Controller
-	categoryController.InsertCategoryController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -297,7 +284,11 @@ func TestValidEditCategoryController(t *testing.T) {
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
 	categoryController := NewCategoryController(categoryModel)
+
+	// -- Declare Route
 	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.PUT("/api/categories/:id", categoryController.EditCategoryController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -307,14 +298,10 @@ func TestValidEditCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	reqLogin := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
 	reqLogin.Header.Set("Content-Type", "application/json")
 	resLogin := httptest.NewRecorder()
-	contextLogin := e.NewContext(reqLogin, resLogin)
-	contextLogin.SetPath("/api/login")
-
-	// -- Declare Controller
-	authController.LoginUserController(contextLogin)
+	e.ServeHTTP(resLogin, reqLogin)
 
 	// -- Declare Response and Convert to JSON
 	type ResponseLogin struct {
@@ -340,17 +327,11 @@ func TestValidEditCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewBuffer(reqBodyPost))
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req := httptest.NewRequest(echo.PUT, "/api/categories/1", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprint("Bearer ", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/categories/:id")
-	context.SetParamNames("id")
-	context.SetParamValues("2")
-
-	// -- Declare Controller
-	categoryController.EditCategoryController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
@@ -376,7 +357,11 @@ func TestValidDeleteCategoryController(t *testing.T) {
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
 	categoryController := NewCategoryController(categoryModel)
+
+	// -- Declare Route
 	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.DELETE("/api/categories/:id", categoryController.DeleteCategoryController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -386,14 +371,10 @@ func TestValidDeleteCategoryController(t *testing.T) {
 	})
 
 	// -- Setting Controller
-	reqLogin := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
 	reqLogin.Header.Set("Content-Type", "application/json")
 	resLogin := httptest.NewRecorder()
-	contextLogin := e.NewContext(reqLogin, resLogin)
-	contextLogin.SetPath("/api/login")
-
-	// -- Declare Controller
-	authController.LoginUserController(contextLogin)
+	e.ServeHTTP(resLogin, reqLogin)
 
 	// -- Declare Response and Convert to JSON
 	type ResponseLogin struct {
@@ -414,17 +395,11 @@ func TestValidDeleteCategoryController(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(http.MethodDelete, "/", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req := httptest.NewRequest(echo.DELETE, "/api/categories/1", nil)
+	req.Header.Set("Authorization", fmt.Sprint("Bearer ", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/api/categories/:id")
-	context.SetParamNames("id")
-	context.SetParamValues("2")
-
-	// -- Declare Controller
-	categoryController.DeleteCategoryController(context)
+	e.ServeHTTP(res, req)
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
