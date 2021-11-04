@@ -1,11 +1,12 @@
 package ingredient
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 type IngredientController struct {

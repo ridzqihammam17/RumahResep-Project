@@ -4,6 +4,8 @@ import (
 	"rumah_resep/api/controllers/auth"
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
+	"rumah_resep/api/controllers/ingredient"
+	recipeingredients "rumah_resep/api/controllers/recipeIngredients"
 	"rumah_resep/api/controllers/recipes"
 	recipescategories "rumah_resep/api/controllers/recipesCategories"
 
@@ -20,6 +22,8 @@ func Route(
 	recipeController *recipes.RecipeController,
 	categoryController *categories.CategoryController,
 	recipesCategroriesController *recipescategories.RecipesCategoriesController,
+	ingredientController *ingredient.IngredientController,
+	recipeIngredientsController *recipeingredients.RecipeIngredientsController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -58,7 +62,18 @@ func Route(
 	e.DELETE("/api/categories/:id", categoryController.DeleteCategoryController, jwtMiddleware)
 
 	// Recipe Categories
-	e.POST("api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
-	e.GET("/api/recipes/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
+	e.POST("/api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
+	e.GET("/api/recipe/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
+	// Ingredients
+	e.GET("/api/ingredients", ingredientController.GetAllIngredientController, jwtMiddleware)
+	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, jwtMiddleware)
+	e.POST("/api/ingredients", ingredientController.CreateIngredientController, jwtMiddleware)
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, jwtMiddleware)
+	e.PUT("/api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, jwtMiddleware)
+	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, jwtMiddleware)
+
+	// Recipe Ingredients
+	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
+	e.GET("/api/ingredients/recipe/:recipeId", recipeIngredientsController.GetIngredientsByRecipeIdController, jwtMiddleware)
 }

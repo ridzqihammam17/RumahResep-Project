@@ -1,7 +1,6 @@
 package recipescategories
 
 import (
-	"fmt"
 	"net/http"
 	"rumah_resep/models"
 	"strconv"
@@ -37,22 +36,30 @@ func NewRecipesCategoriesController(
 
 func (controller *RecipesCategoriesController) AddRecipeCategoriesController(c echo.Context) error {
 	var recipeCategories models.RecipeCategories
-	c.Bind(&recipeCategories)
-	// fmt.Println(c.Param("categoryId"))
-	// if err != nil {
-	// 	return c.String(http.StatusBadRequest, "Bad Request")
-	// }
+	if err := c.Bind(&recipeCategories); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
 	categoryItem := models.RecipeCategories{
 		RecipeId:   recipeCategories.RecipeId,
 		CategoryId: recipeCategories.CategoryId,
 	}
-	addCategory, err := controller.recipesCategoriesModel.AddRecipeCategories(categoryItem)
+	_, err := controller.recipesCategoriesModel.AddRecipeCategories(categoryItem)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    addCategory,
+		"success": true,
+		"code":    200,
 		"message": "Success Add Recipe Category",
 	})
 
@@ -65,13 +72,17 @@ func (controller *RecipesCategoriesController) GetRecipeByCategoryIdController(c
 		value, _ := strconv.Atoi(v)
 		categoryName = append(categoryName, value)
 	}
-	fmt.Println(categoryName)
 	recipe, err := controller.recipesCategoriesModel.GetRecipeByCategoryId(categoryName)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
 		"data":    recipe,
 		"message": "Success Get Recipe By Category ID",
 	})
