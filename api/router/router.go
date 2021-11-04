@@ -5,6 +5,8 @@ import (
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
 	"rumah_resep/api/controllers/recipes"
+	recipescategories "rumah_resep/api/controllers/recipesCategories"
+
 	"rumah_resep/constants"
 
 	"github.com/labstack/echo/v4"
@@ -17,6 +19,7 @@ func Route(
 	cartController *carts.CartController,
 	recipeController *recipes.RecipeController,
 	categoryController *categories.CategoryController,
+	recipesCategroriesController *recipescategories.RecipesCategoriesController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -43,7 +46,7 @@ func Route(
 	e.POST("/api/recipes", recipeController.CreateRecipeController, jwtMiddleware)
 	e.PUT("/api/recipes/:recipeId", recipeController.UpdateRecipeController, jwtMiddleware)
 	e.DELETE("/api/recipes/:recipeId", recipeController.DeleteRecipeController, jwtMiddleware)
-	e.GET("/api/recipes/category/:categoryId", recipeController.GetRecipeByCategoryIdController, jwtMiddleware)
+	// e.GET("/api/recipes/category/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Categories
@@ -53,5 +56,9 @@ func Route(
 	e.GET("/api/categories/:id", categoryController.GetCategoryController, jwtMiddleware)
 	e.PUT("/api/categories/:id", categoryController.EditCategoryController, jwtMiddleware)
 	e.DELETE("/api/categories/:id", categoryController.DeleteCategoryController, jwtMiddleware)
+
+	// Recipe Categories
+	e.POST("api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
+	e.GET("/api/recipes/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
 }

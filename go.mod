@@ -1,6 +1,6 @@
 module rumah_resep
 
-go 1.17
+go 1.16
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -12,6 +12,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	github.com/spf13/viper v1.9.0
 	gorm.io/driver/mysql v1.1.3
 	gorm.io/gorm v1.22.2
 )

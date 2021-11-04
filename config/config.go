@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 //AppConfig Application configuration
@@ -21,8 +22,20 @@ type ThirdPartyConfig struct {
 	GoogleMapsGeoCodeAPIUrl string
 }
 
+type HTTPServerConfig struct {
+	Addr            string
+	ShutdownTimeout time.Duration
+	WriteTimeout    time.Duration
+	ReadTimeout     time.Duration
+	IdleTimeout     time.Duration
+}
+
+//HTTPServer httpServer config
+var HTTPServer HTTPServerConfig
+
 var lock = &sync.Mutex{}
 var appConfig *AppConfig
+var ThirdParty ThirdPartyConfig
 
 // -- GeoCoding and MapsConfig
 var ThirdParty ThirdPartyConfig
@@ -32,7 +45,7 @@ func GetConfig() *AppConfig {
 	defer lock.Unlock()
 
 	if appConfig == nil {
-		appConfig = initConfig()
+		appConfig = InitConfig()
 	}
 
 	return appConfig
@@ -45,7 +58,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func initConfig() *AppConfig {
+func InitConfig() *AppConfig {
 	var defaultConfig AppConfig
 
 	httpPort, err := strconv.Atoi(getEnv("HTTP_PORT", "8080"))
@@ -59,6 +72,12 @@ func initConfig() *AppConfig {
 
 	ThirdParty = ThirdPartyConfig{
 		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),
+		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
+		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
+	}
+
+	ThirdParty = ThirdPartyConfig{
+		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", "AIzaSyAfF0h3oFhZS23os2XgPF8OIxTxKtkD8qI"),
 		GoogleMapsAPIUrl:        getEnv("ThirdParty.GoogleMapsAPIUrl", "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=%s,%s&destinations=%s,%s&key=%s"),
 		GoogleMapsGeoCodeAPIUrl: getEnv("ThirdParty.GoogleMapsGeoCodeAPIUrl", "https://maps.googleapis.com/maps/api/geocode/json?"),
 	}
