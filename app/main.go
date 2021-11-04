@@ -12,6 +12,7 @@ import (
 	cartControllers "rumah_resep/api/controllers/carts"
 	categoryControllers "rumah_resep/api/controllers/categories"
 	ingredientControllers "rumah_resep/api/controllers/ingredient"
+	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
 
@@ -33,6 +34,7 @@ func main() {
 	categoryModel := models.NewCategoryModel(db)
 	recipesCategoriesModel := models.NewRecipesCategoriesModel(db)
 	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientsModel := models.NewRecipeIngredientsModel(db)
 	stockModel := models.NewStockModel(db)
 
 	//initiate controller
@@ -43,13 +45,14 @@ func main() {
 	newRecipesCategoriesController := recipeCategoriesControllers.NewRecipesCategoriesController(recipesCategoriesModel, recipeModel, categoryModel)
 	// newStockController := stockControllers.NewStrockController(stockModel)
 	newIngredientController := ingredientControllers.NewIngredientController(ingredientModel, stockModel)
+	newRecipeIngredientsController := recipeIngredientsControllers.NewRecipeIngredientsController(recipeIngredientsModel, recipeModel, ingredientModel)
 
 	//create echo http with log
 	e := echo.New()
 	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
-	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController)
+	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)

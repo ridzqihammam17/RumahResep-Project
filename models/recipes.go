@@ -11,7 +11,7 @@ type Recipe struct {
 	// many2many with category
 	Categories []*Category `gorm:"many2many:recipe_categories" json:"categories"`
 	// many2many with ingredient
-	Ingredients []Ingredient `gorm:"many2many:recipe_ingredients" json:"ingredients"`
+	Ingredients []*Ingredient `gorm:"many2many:recipe_ingredients" json:"ingredients"`
 
 	// Category int `json:"category" form:"category"`
 }

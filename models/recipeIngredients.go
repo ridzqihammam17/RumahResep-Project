@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type RecipeIngredients struct {
 	gorm.Model
@@ -16,19 +18,14 @@ func NewRecipeIngredientsModel(db *gorm.DB) *GormRecipeIngredientsModel {
 	return &GormRecipeIngredientsModel{db: db}
 }
 
-type RecipeIngredientsModel struct {
-	GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error) 
+type RecipeIngredientsModel interface {
+	AddIngredientsRecipe(recipeIngredients RecipeIngredients) (RecipeIngredients, error)
+	// GetIngredientsByRecipeId(recipeId int) (RecipeIngredients, error)
 }
 
-func (m *GormRecipeIngredientsModel) GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error) {
-	var recipeIngredients []RecipeIngredients
-
-	if err := m.db.Find(&recipeIngredients, "recipe_id", recipeId).Error; err != nil {
-		return recipe_ingredients, err
+func (m *GormRecipeIngredientsModel) AddIngredientsRecipe(recipeIngredients RecipeIngredients) (RecipeIngredients, error) {
+	if err := m.db.Save(&recipeIngredients).Error; err != nil {
+		return recipeIngredients, err
 	}
-	if len(recipe_ingredients) == 0 {
-
-		return nil, errors.New("Data Not Found")
-	}
-	return recipe_ingredients, nil
+	return recipeIngredients, nil
 }

@@ -27,6 +27,7 @@ func DatabaseMigration(db *gorm.DB) {
 	db.AutoMigrate(models.User{})
 	db.AutoMigrate(models.Cart{})
 	db.AutoMigrate(models.RecipeCategories{})
+	db.AutoMigrate(models.RecipeIngredients{})
 	db.AutoMigrate(models.Recipe{})
 	db.AutoMigrate(models.Category{})
 	db.AutoMigrate(models.Ingredient{})

@@ -1,12 +1,19 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Ingredient struct {
 	gorm.Model
 	Name  string `json:"name" form:"name"`
 	Price int    `json:"price" form:"price"`
 	Stock int    `json:"stock" form:"stock"`
+
+	// many2many with recipe
+	Recipes []*Recipe `gorm:"many2many:recipe_ingredients" json:"recipe"`
 }
 
 type GormIngredientModel struct {
@@ -24,6 +31,7 @@ type IngredientModel interface {
 	UpdateIngredient(ingredient Ingredient, ingredientId int) (Ingredient, error)
 	DeleteIngredient(ingredientId int) (Ingredient, error)
 	UpdateStock(ingredient Ingredient, ingredientId int) (Ingredient, error)
+	GetIngredientsByRecipeId(recipeId int) (string, error)
 }
 
 func (m *GormIngredientModel) CreateIngredient(ingredient Ingredient) (Ingredient, error) {
@@ -88,4 +96,22 @@ func (m *GormIngredientModel) DeleteIngredient(ingredientId int) (Ingredient, er
 		return ingredient, err
 	}
 	return ingredient, nil
+}
+
+func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) (string, error) {
+	// var recipeIngredients []Ingredient
+	var recipeIngredients string
+	if err := m.db.Raw("SELECT ingredients.name FROM `ingredients` left join recipe_ingredients ON ingredients.id=recipe_ingredients.ingredient_id WHERE recipe_ingredients.recipe_id = 1").Error; err != nil {
+		return recipeIngredients, err
+	}
+	fmt.Println(recipeIngredients)
+
+	// if err := m.db.Find(&recipeIngredients, "recipe_id", recipeId).Error; err != nil {
+
+	// }
+	// if len(recipeIngredients) == 0 {
+
+	// 	return nil, errors.New("Data Not Found")
+	// }
+	return recipeIngredients, nil
 }
