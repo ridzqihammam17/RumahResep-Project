@@ -55,7 +55,7 @@ func initConfig() *AppConfig {
 
 	defaultConfig.Port = httpPort
 	defaultConfig.Database.Driver = "mysql"
-	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
+	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
 
 	ThirdParty = ThirdPartyConfig{
 		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),
