@@ -4,6 +4,7 @@ import (
 	"rumah_resep/api/controllers/auth"
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
+	"rumah_resep/api/controllers/ingredient"
 	"rumah_resep/api/controllers/recipes"
 	recipescategories "rumah_resep/api/controllers/recipesCategories"
 
@@ -20,6 +21,7 @@ func Route(
 	recipeController *recipes.RecipeController,
 	categoryController *categories.CategoryController,
 	recipesCategroriesController *recipescategories.RecipesCategoriesController,
+	ingredientController *ingredient.IngredientController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -61,4 +63,11 @@ func Route(
 	e.POST("api/recipe/categories", recipesCategroriesController.AddRecipeCategoriesController, jwtMiddleware)
 	e.GET("/api/recipes/categories/:categoryId", recipesCategroriesController.GetRecipeByCategoryIdController, jwtMiddleware)
 
+	// Ingredients
+	e.GET("api/ingredients", ingredientController.GetAllIngredientController, jwtMiddleware)
+	e.GET("api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, jwtMiddleware)
+	e.POST("api/ingredients", ingredientController.CreateIngredientController, jwtMiddleware)
+	e.PUT("api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, jwtMiddleware)
+	e.PUT("api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, jwtMiddleware)
+	e.DELETE("api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, jwtMiddleware)
 }

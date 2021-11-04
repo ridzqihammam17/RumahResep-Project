@@ -9,11 +9,13 @@ import (
 	"os"
 	auth "rumah_resep/api/controllers/auth"
 	"rumah_resep/config"
+	"rumah_resep/constants"
 	"rumah_resep/models"
 	"rumah_resep/util"
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -193,134 +195,147 @@ func TestGetRecipeByIdController(t *testing.T) {
 
 }
 
-// func TestCreateRecipeController(t *testing.T) {
-// 	config := config.GetConfig()
-// 	db := util.MysqlDatabaseConnection(config)
-// 	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
-// 	recipesModel := models.NewRecipeModel(db)
-// 	categoriesModel := models.NewCategoryModel(db)
-// 	recipesController := NewRecipeController(recipeCategoriesModel, recipesModel, categoriesModel)
+func TestCreateRecipeController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnection(config)
+	userModel := models.NewUserModel(db)
+	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
+	recipesModel := models.NewRecipeModel(db)
+	categoriesModel := models.NewCategoryModel(db)
+	userController := auth.NewAuthController(userModel)
+	recipesController := NewRecipeController(recipeCategoriesModel, recipesModel, categoriesModel)
 
-// 	ctx, token := LoginForAdmin(t)
-// 	fmt.Println(token)
+	e := echo.New()
 
-// 	reqBodyPost, _ := json.Marshal(map[string]string{
-// 		"name": "Recipe B",
-// 	})
+	e.POST("/api/login", userController.LoginUserController)
+	e.POST("/api/recipes", recipesController.CreateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
-// 	// setting controller
-// 	e := echo.New()
-// 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBodyPost))
-// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	res := httptest.NewRecorder()
-// 	context := e.NewContext(req, res)
-// 	context.Set("user", ctx.Get("user"))
-// 	context.SetPath("/api/recipes")
+	reqBody, _ := json.Marshal(map[string]string{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
 
-// 	// fmt.Println(context)
+	req := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
 
-// 	if err := recipesController.CreateRecipeController(context); err != nil {
-// 		t.Errorf("Should'nt get error, get error: %s", err)
-// 	}
+	type Response struct {
+		Data    interface{} `json:"data"`
+		Message string      `json:"message"`
+	}
+	var response Response
+	resBody := rec.Body.String()
+	json.Unmarshal([]byte(resBody), &response)
 
-// 	// fmt.Println()
+	assert.Equal(t, http.StatusOK, rec.Code)
 
-// 	type Response struct {
-// 		Code    int    `json:"code"`
-// 		Message string `json:"message"`
-// 	}
+	req2 := httptest.NewRequest(echo.POST, "/api/recipes", nil)
+	rec2 := httptest.NewRecorder()
+	req2.Header.Set("Authorization", fmt.Sprint("Bearer ", response.Data.(map[string]interface{})["token"]))
+	e.ServeHTTP(rec2, req2)
 
-// 	var response Response
-// 	fmt.Println(response)
-// 	json.Unmarshal(res.Body.Bytes(), &response)
+	var response2 Response
+	resBody2 := rec2.Body.String()
+	json.Unmarshal([]byte(resBody2), &response2)
 
-// 	assert.Equal(t, 200, res.Code)
-// 	assert.Equal(t, "Create Recipe Success", response.Message)
-// }
+	assert.Equal(t, 200, rec2.Code)
+	assert.Equal(t, "Success Create Recipe ", response2.Message)
+}
 
-// func TestUpdateRecipeController(t *testing.T) {
-// 	config := config.GetConfig()
-// 	db := util.MysqlDatabaseConnection(config)
-// 	recipesModel := models.NewRecipeModel(db)
-// 	recipesController := NewRecipeController(recipesModel)
+func TestUpdateRecipeController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnection(config)
+	userModel := models.NewUserModel(db)
+	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
+	recipesModel := models.NewRecipeModel(db)
+	categoriesModel := models.NewCategoryModel(db)
+	userController := auth.NewAuthController(userModel)
+	recipesController := NewRecipeController(recipeCategoriesModel, recipesModel, categoriesModel)
 
-// 	e, token := LoginForAdmin(t)
-// 	// fmt.Println(token)
+	e := echo.New()
 
-// 	reqBodyPost, _ := json.Marshal(map[string]string{
-// 		"name": "Recipe B Updated",
-// 	})
+	e.POST("/api/login", userController.LoginUserController)
+	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
-// 	// setting controller
-// 	e := echo.New()
-// 	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewBuffer(reqBodyPost))
-// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	res := httptest.NewRecorder()
-// 	context := e.NewContext(req, res)
-// 	context.SetPath("/api/recipes/:recipeId")
-// 	context.SetParamNames("recipeId")
-// 	context.SetParamValues("1")
+	reqBody, _ := json.Marshal(map[string]string{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
 
-// 	// fmt.Println(context)
+	req := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
 
-// 	if err := recipesController.UpdateRecipeController(context); err != nil {
-// 		t.Errorf("Should'nt get error, get error: %s", err)
-// 	}
+	type Response struct {
+		Data    interface{} `json:"data"`
+		Message string      `json:"message"`
+	}
+	var response Response
+	resBody := rec.Body.String()
+	json.Unmarshal([]byte(resBody), &response)
 
-// 	// fmt.Println()
+	assert.Equal(t, http.StatusOK, rec.Code)
 
-// 	type Response struct {
-// 		Code    int    `json:"code"`
-// 		Message string `json:"message"`
-// 	}
+	req2 := httptest.NewRequest(echo.PUT, "/api/recipes/2", nil)
+	rec2 := httptest.NewRecorder()
+	req2.Header.Set("Authorization", fmt.Sprint("Bearer ", response.Data.(map[string]interface{})["token"]))
+	e.ServeHTTP(rec2, req2)
 
-// 	var response Response
-// 	fmt.Println(response)
-// 	json.Unmarshal(res.Body.Bytes(), &response)
+	var response2 Response
+	resBody2 := rec2.Body.String()
+	json.Unmarshal([]byte(resBody2), &response2)
 
-// 	assert.Equal(t, 200, res.Code)
-// 	assert.Equal(t, "Success Update Recipe", response.Message)
-// }
+	assert.Equal(t, 200, rec2.Code)
+	assert.Equal(t, "Success Update Recipe", response2.Message)
+}
 
-// func TestDeleteRecipeController(t *testing.T) {
-// 	config := config.GetConfig()
-// 	db := util.MysqlDatabaseConnection(config)
-// 	recipesModel := models.NewRecipeModel(db)
-// 	recipesController := NewRecipeController(recipesModel)
+func TestDeleteRecipeController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnection(config)
+	userModel := models.NewUserModel(db)
+	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
+	recipesModel := models.NewRecipeModel(db)
+	categoriesModel := models.NewCategoryModel(db)
+	userController := auth.NewAuthController(userModel)
+	recipesController := NewRecipeController(recipeCategoriesModel, recipesModel, categoriesModel)
 
-// 	token := LoginForAdmin(t)
-// 	// fmt.Println(token)
+	e := echo.New()
 
-// 	// setting controller
-// 	e := echo.New()
-// 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
-// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	res := httptest.NewRecorder()
-// 	context := e.NewContext(req, res)
-// 	context.SetPath("/api/recipes/:recipeId")
-// 	context.SetParamNames("recipeId")
-// 	context.SetParamValues("1")
+	e.POST("/api/login", userController.LoginUserController)
+	e.DELETE("/api/recipes/:recipeId", recipesController.CreateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
-// 	// fmt.Println(context)
+	reqBody, _ := json.Marshal(map[string]string{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
 
-// 	if err := recipesController.DeleteRecipeController(context); err != nil {
-// 		t.Errorf("Should'nt get error, get error: %s", err)
-// 	}
+	req := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
 
-// 	// fmt.Println()
+	type Response struct {
+		Data    interface{} `json:"data"`
+		Message string      `json:"message"`
+	}
 
-// 	type Response struct {
-// 		Code    int    `json:"code"`
-// 		Message string `json:"message"`
-// 	}
+	var response Response
+	resBody := rec.Body.String()
+	json.Unmarshal([]byte(resBody), &response)
 
-// 	var response Response
-// 	fmt.Println(response)
-// 	json.Unmarshal(res.Body.Bytes(), &response)
+	assert.Equal(t, http.StatusOK, rec.Code)
 
-// 	assert.Equal(t, 200, res.Code)
-// 	assert.Equal(t, "Success Delete Recipe", response.Message)
-// }
+	req2 := httptest.NewRequest(echo.DELETE, "/api/recipes/2", nil)
+	rec2 := httptest.NewRecorder()
+	req2.Header.Set("Authorization", fmt.Sprint("Bearer ", response.Data.(map[string]interface{})["token"]))
+	e.ServeHTTP(rec2, req2)
+
+	var response2 Response
+	resBody2 := rec2.Body.String()
+	json.Unmarshal([]byte(resBody2), &response2)
+
+	assert.Equal(t, 200, rec2.Code)
+	assert.Equal(t, "Success Delete Recipe", response2.Message)
+}

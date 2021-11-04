@@ -35,7 +35,8 @@ var HTTPServer HTTPServerConfig
 
 var lock = &sync.Mutex{}
 var appConfig *AppConfig
-var ThirdParty ThirdPartyConfig
+
+// var ThirdParty ThirdPartyConfig
 
 // -- GeoCoding and MapsConfig
 var ThirdParty ThirdPartyConfig

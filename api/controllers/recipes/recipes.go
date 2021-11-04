@@ -57,7 +57,7 @@ func (controller *RecipeController) CreateRecipeController(c echo.Context) error
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"recipe":  output,
-		"message": "Create Recipe Success",
+		"message": "Success Create Recipe",
 	})
 }
 
