@@ -1,9 +1,11 @@
 package cartdetails
 
 import (
+	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -78,13 +80,13 @@ func (controller *CartDetailsController) AddRecipeToCartController(c echo.Contex
 	}
 
 	// Get Total Price
-	var idQtyingredient []models.RecipeIngredients
+	var idQtyIngredient []models.RecipeIngredients
 	var totalPrice int
-	idQtyingredient, _ = controller.recipeIngredientsModel.GetIdIngredientQtyIngredient(cartDetails.RecipeID)
+	idQtyIngredient, _ = controller.recipeIngredientsModel.GetIdIngredientQtyIngredient(cartDetails.RecipeID)
 
-	for i := 0; i < len(idQtyingredient); i++ {
-		price, _ := controller.ingredientsModel.GetIngredientPrice(idQtyingredient[i].IngredientId)
-		totalPrice += idQtyingredient[i].QtyIngredient * price
+	for i := 0; i < len(idQtyIngredient); i++ {
+		price, _ := controller.ingredientsModel.GetIngredientPrice(idQtyIngredient[i].IngredientId)
+		totalPrice += idQtyIngredient[i].QtyIngredient * price
 	}
 
 	// Prepare Post Body
@@ -92,7 +94,7 @@ func (controller *CartDetailsController) AddRecipeToCartController(c echo.Contex
 		CartID:   cartId,
 		RecipeID: cartDetails.RecipeID,
 		Quantity: cartDetails.Quantity,
-		Price:    totalPrice,
+		Price:    totalPrice * cartDetails.Quantity,
 	}
 
 	output, err := controller.cartDetailsModel.AddRecipeToCart(newCartDetails)
@@ -123,6 +125,9 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 		})
 	}
 
+	// Get cart id
+	cartId, _ := controller.cartModel.GetCartIdByUserId(int(userId))
+
 	var cartDetails models.CartDetails
 	if err := c.Bind(&cartDetails); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -132,12 +137,35 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 		})
 	}
 
+	recipeId, err := strconv.Atoi(c.Param("recipeId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+	fmt.Println(recipeId)
+
+	// Get Total Price
+	var idQtyingredient []models.RecipeIngredients
+	var totalPrice int
+	idQtyingredient, _ = controller.recipeIngredientsModel.GetIdIngredientQtyIngredient(recipeId)
+	fmt.Println(idQtyingredient)
+	for i := 0; i < len(idQtyingredient); i++ {
+		price, _ := controller.ingredientsModel.GetIngredientPrice(idQtyingredient[i].IngredientId)
+		totalPrice += idQtyingredient[i].QtyIngredient * price
+	}
+	// totalPrice *= cartDetails.Quantity
+	fmt.Println(totalPrice)
 	newCartDetails := models.CartDetails{
-		RecipeID: cartDetails.RecipeID,
+		CartID:   cartId,
+		RecipeID: recipeId,
 		Quantity: cartDetails.Quantity,
+		Price:    totalPrice * cartDetails.Quantity,
 	}
 
-	output, err := controller.cartDetailsModel.UpdateRecipePortion(newCartDetails, int(userId))
+	output, err := controller.cartDetailsModel.UpdateRecipePortion(newCartDetails, recipeId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -156,7 +184,7 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 
 func (controller *CartDetailsController) DeleteRecipeFromCartController(c echo.Context) error {
 	//check role customer or not
-	userId, role := middlewares.ExtractTokenUser(c)
+	_, role := middlewares.ExtractTokenUser(c)
 	if role != "customer" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
@@ -174,7 +202,16 @@ func (controller *CartDetailsController) DeleteRecipeFromCartController(c echo.C
 		})
 	}
 
-	output, err := controller.cartDetailsModel.DeleteRecipeFromCart(int(userId))
+	recipeId, err := strconv.Atoi(c.Param("recipeId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
+	output, err := controller.cartDetailsModel.DeleteRecipeFromCart(recipeId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,

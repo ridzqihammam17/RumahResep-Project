@@ -29,7 +29,7 @@ type CartDetailsModel interface {
 	// GetRecipePriceByRecipeId(recipeId int) (RecipePriceResponse, error)
 	AddRecipeToCart(cartDetails CartDetails) (CartDetails, error)
 	UpdateRecipePortion(cartDetails CartDetails, recipeId int) (CartDetails, error)
-	DeleteRecipeFromCart(cartId int) (CartDetails, error)
+	DeleteRecipeFromCart(recipeId int) (CartDetails, error)
 	CountQtyRecipeOnCart(cartId int) (int, error)
 	CountTotalPriceOnCart(cartId int) (int, int, error)
 }
@@ -55,11 +55,12 @@ func (m *GormCartDetailsModel) AddRecipeToCart(cartDetails CartDetails) (CartDet
 
 func (m *GormCartDetailsModel) UpdateRecipePortion(newCartDetails CartDetails, recipeId int) (CartDetails, error) {
 	var cartDetails CartDetails
-	if err := m.db.Find(&cartDetails, "id=?", recipeId).Error; err != nil {
+	if err := m.db.Find(&cartDetails, "recipe_id=?", recipeId).Error; err != nil {
 		return cartDetails, err
 	}
 
 	cartDetails.Quantity = newCartDetails.Quantity
+	// cartDetails.Price = newCartDetails.Price
 
 	if err := m.db.Save(&cartDetails).Error; err != nil {
 		return cartDetails, err
@@ -67,9 +68,9 @@ func (m *GormCartDetailsModel) UpdateRecipePortion(newCartDetails CartDetails, r
 	return cartDetails, nil
 }
 
-func (m *GormCartDetailsModel) DeleteRecipeFromCart(cartId int) (CartDetails, error) {
+func (m *GormCartDetailsModel) DeleteRecipeFromCart(recipeId int) (CartDetails, error) {
 	var cartDetails CartDetails
-	if err := m.db.Find(&cartDetails, "id=?", cartId).Error; err != nil {
+	if err := m.db.Find(&cartDetails, "recipe_id=?", recipeId).Error; err != nil {
 		return cartDetails, err
 	}
 	if err := m.db.Delete(&cartDetails).Error; err != nil {

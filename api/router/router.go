@@ -39,7 +39,7 @@ func Route(
 	// ------------------------------------------------------------------
 	// Carts
 	// ------------------------------------------------------------------
-	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
+
 	// e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
 	// e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
 	// e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
@@ -79,9 +79,12 @@ func Route(
 	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
 	e.GET("/api/ingredients/recipe/:recipeId", recipeIngredientsController.GetIngredientsByRecipeIdController, jwtMiddleware)
 
+	// Carts
+	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
+
 	// Cart Details
-	e.GET("/api/carts", cartDetailsController.GetAllRecipeByCartIdController, jwtMiddleware)
-	e.POST("/api/carts/recipe", cartDetailsController.AddRecipeToCartController, jwtMiddleware)
-	// e.PUT("/api/carts/:recipeId", cartDetailsController.UpdateRecipePortionController, jwtMiddleware)
-	// e.DELETE("/api/carts/:recipeId", cartDetailsController.DeleteRecipeFromCartController, jwtMiddleware)
+	e.GET("/api/cartdetails", cartDetailsController.GetAllRecipeByCartIdController, jwtMiddleware)
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, jwtMiddleware)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, jwtMiddleware)
+	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, jwtMiddleware)
 }
