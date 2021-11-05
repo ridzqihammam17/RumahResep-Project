@@ -2,6 +2,7 @@ package router
 
 import (
 	"rumah_resep/api/controllers/auth"
+	cartdetails "rumah_resep/api/controllers/cartDetails"
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
 	"rumah_resep/api/controllers/ingredient"
@@ -24,6 +25,7 @@ func Route(
 	recipesCategroriesController *recipescategories.RecipesCategoriesController,
 	ingredientController *ingredient.IngredientController,
 	recipeIngredientsController *recipeingredients.RecipeIngredientsController,
+	cartDetailsController *cartdetails.CartDetailsController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -76,4 +78,10 @@ func Route(
 	// Recipe Ingredients
 	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
 	e.GET("/api/ingredients/recipe/:recipeId", recipeIngredientsController.GetIngredientsByRecipeIdController, jwtMiddleware)
+
+	// Cart Details
+	e.GET("/api/carts", cartDetailsController.GetAllRecipeByCartIdController, jwtMiddleware)
+	e.POST("/api/carts/recipe", cartDetailsController.AddRecipeToCartController, jwtMiddleware)
+	// e.PUT("/api/carts/:recipeId", cartDetailsController.UpdateRecipePortionController, jwtMiddleware)
+	// e.DELETE("/api/carts/:recipeId", cartDetailsController.DeleteRecipeFromCartController, jwtMiddleware)
 }
