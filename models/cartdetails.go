@@ -36,7 +36,7 @@ type CartDetailsModel interface {
 
 func (m *GormCartDetailsModel) GetAllRecipeByCartId(cartId int) ([]CartDetails, error) {
 	var cartDetails []CartDetails
-	if err := m.db.Find(&cartDetails, cartId).Error; err != nil {
+	if err := m.db.Find(&cartDetails, "cart_id", cartId).Error; err != nil {
 		return nil, err
 	}
 	return cartDetails, nil

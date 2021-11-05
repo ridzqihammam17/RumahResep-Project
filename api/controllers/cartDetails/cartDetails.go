@@ -38,7 +38,9 @@ func (controller *CartDetailsController) GetAllRecipeByCartIdController(c echo.C
 		})
 	}
 
-	cartDetails, err := controller.cartDetailsModel.GetAllRecipeByCartId(int(userId))
+	cartId, _ := controller.cartModel.GetCartIdByUserId(int(userId))
+
+	cartDetails, err := controller.cartDetailsModel.GetAllRecipeByCartId(cartId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
