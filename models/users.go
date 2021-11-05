@@ -18,7 +18,7 @@ type User struct {
 	Gender    string  `json:"gender" form:"gender"`
 	Role      string  `json:"role" form:"role"`
 	Token     string  `json:"token" form:"token"`
-	Carts     Cart    `gorm:"foreignKey:UserID"`
+	Cart      Cart    `gorm:"foreignKey:UserID"`
 }
 
 type GormUserModel struct {

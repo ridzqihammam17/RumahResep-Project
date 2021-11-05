@@ -25,7 +25,7 @@ func LoggerMiddlewares(e *echo.Echo) {
 	}))
 }
 
-func ExtractTokenUser(c echo.Context) (int, string) {
+func ExtractTokenUser(c echo.Context) (uint, string) {
 
 	// fmt.Println(c.Get("user"))
 	// if temp := c.Get("user"); temp != nil {
@@ -41,7 +41,7 @@ func ExtractTokenUser(c echo.Context) (int, string) {
 	token := c.Get("user").(*jwt.Token)
 	if token.Valid {
 		claims := token.Claims.(jwt.MapClaims)
-		userId := int(claims["userId"].(float64))
+		userId := uint(claims["userId"].(float64))
 		role := claims["role"].(string)
 		return userId, role
 	}

@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -32,7 +31,8 @@ type IngredientModel interface {
 	UpdateIngredient(ingredient Ingredient, ingredientId int) (Ingredient, error)
 	DeleteIngredient(ingredientId int) (Ingredient, error)
 	UpdateStock(ingredient Ingredient, ingredientId int) (Ingredient, error)
-	GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error)
+	GetIngredientsByRecipeId(recipeId int) ([]Ingredient, error)
+	GetIngredientPrice(ingredientId int) (int, error)
 }
 
 func (m *GormIngredientModel) CreateIngredient(ingredient Ingredient) (Ingredient, error) {
@@ -99,21 +99,23 @@ func (m *GormIngredientModel) DeleteIngredient(ingredientId int) (Ingredient, er
 	return ingredient, nil
 }
 
-func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) ([]RecipeIngredients, error) {
-	var recipeIngredients []RecipeIngredients
-	// var recipeIngredients string
-	// if err := m.db.Select("name").Find(&ingredients).Where()
-	if err := m.db.Raw("SELECT ingredients.name FROM `ingredients` left join recipe_ingredients ON ingredients.id=recipe_ingredients.ingredient_id WHERE recipe_ingredients.recipe_id = ?", "recipeId", recipeId).Error; err != nil {
+func (m *GormIngredientModel) GetIngredientsByRecipeId(recipeId int) ([]Ingredient, error) {
+	var recipeIngredients []Ingredient
+	if err := m.db.Raw("SELECT i.id, i.name FROM recipe_ingredients rc join ingredients i ON i.id = rc.ingredient_id WHERE rc.recipe_id = ?", recipeId).Scan(&recipeIngredients).Error; err != nil {
 		return recipeIngredients, err
 	}
-	fmt.Println(recipeIngredients)
 
-	// if err := m.db.Find(&recipeIngredients, "recipe_id", recipeId).Error; err != nil {
-
-	// }
 	if len(recipeIngredients) == 0 {
 
 		return nil, errors.New("Data Not Found")
 	}
 	return recipeIngredients, nil
+}
+
+func (m *GormIngredientModel) GetIngredientPrice(ingredientId int) (int, error) {
+	var ingredientPrice int
+	if err := m.db.Raw("SELECT i.price FROM ingredients i  WHERE i.id = ?", ingredientId).Scan(&ingredientPrice).Error; err != nil {
+		return ingredientPrice, err
+	}
+	return ingredientPrice, nil
 }

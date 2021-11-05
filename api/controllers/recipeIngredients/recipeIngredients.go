@@ -30,8 +30,9 @@ func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c 
 	// 	return c.String(http.StatusBadRequest, "Bad Request")
 	// }
 	categoryItem := models.RecipeIngredients{
-		RecipeId:     recipeIngredients.RecipeId,
-		IngredientId: recipeIngredients.IngredientId,
+		RecipeId:      recipeIngredients.RecipeId,
+		IngredientId:  recipeIngredients.IngredientId,
+		QtyIngredient: recipeIngredients.QtyIngredient,
 	}
 	addIngredient, err := controller.recipeIngredientsModel.AddIngredientsRecipe(categoryItem)
 	if err != nil {

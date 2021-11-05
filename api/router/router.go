@@ -2,6 +2,7 @@ package router
 
 import (
 	"rumah_resep/api/controllers/auth"
+	cartdetails "rumah_resep/api/controllers/cartDetails"
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
 	"rumah_resep/api/controllers/ingredient"
@@ -24,6 +25,7 @@ func Route(
 	recipesCategroriesController *recipescategories.RecipesCategoriesController,
 	ingredientController *ingredient.IngredientController,
 	recipeIngredientsController *recipeingredients.RecipeIngredientsController,
+	cartDetailsController *cartdetails.CartDetailsController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -37,10 +39,10 @@ func Route(
 	// ------------------------------------------------------------------
 	// Carts
 	// ------------------------------------------------------------------
-	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
-	e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
-	e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
-	e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
+
+	// e.GET("/api/carts/:id", cartController.GetCartController, jwtMiddleware)
+	// e.PUT("/api/carts/:id", cartController.UpdateCartController, jwtMiddleware)
+	// e.DELETE("/api/carts/:id", cartController.DeleteCartController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Recipe
@@ -76,4 +78,13 @@ func Route(
 	// Recipe Ingredients
 	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
 	e.GET("/api/ingredients/recipe/:recipeId", recipeIngredientsController.GetIngredientsByRecipeIdController, jwtMiddleware)
+
+	// Carts
+	e.POST("/api/carts", cartController.CreateCartController, jwtMiddleware)
+
+	// Cart Details
+	e.GET("/api/cartdetails", cartDetailsController.GetAllRecipeByCartIdController, jwtMiddleware)
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, jwtMiddleware)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, jwtMiddleware)
+	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, jwtMiddleware)
 }
