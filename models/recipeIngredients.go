@@ -8,6 +8,7 @@ type RecipeIngredients struct {
 	gorm.Model
 	RecipeId     int `gorm:"primaryKey" json:"recipes_id" form:"recipes_id"`
 	IngredientId int `gorm:"primaryKey" json:"ingredients_id" form:"ingredients_id"`
+	// ;foreignKey:ingredient_id;joinForeignKey:ingredientsID;References:recipe_id;joinReferences:recipesID"
 }
 
 type GormRecipeIngredientsModel struct {
@@ -15,6 +16,7 @@ type GormRecipeIngredientsModel struct {
 }
 
 func NewRecipeIngredientsModel(db *gorm.DB) *GormRecipeIngredientsModel {
+	db.Migrator().AddColumn(&RecipeIngredients{}, "Harga")
 	return &GormRecipeIngredientsModel{db: db}
 }
 

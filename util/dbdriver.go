@@ -26,10 +26,15 @@ func MysqlDatabaseConnection(config *config.AppConfig) *gorm.DB {
 func DatabaseMigration(db *gorm.DB) {
 	db.AutoMigrate(models.User{})
 	db.AutoMigrate(models.Cart{})
-	db.AutoMigrate(models.RecipeCategories{})
-	db.AutoMigrate(models.RecipeIngredients{})
+	db.AutoMigrate(models.CartDetails{})
+	db.AutoMigrate(models.Checkout{})
 	db.AutoMigrate(models.Recipe{})
 	db.AutoMigrate(models.Category{})
 	db.AutoMigrate(models.Ingredient{})
+	db.AutoMigrate(models.RecipeCategories{})
+	db.AutoMigrate(models.RecipeIngredients{})
+
 	db.AutoMigrate(models.Stock{})
+	db.AutoMigrate(models.Transaction{})
+	db.AutoMigrate(models.Payment{})
 }
