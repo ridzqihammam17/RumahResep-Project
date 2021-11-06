@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type Stock struct {
 	gorm.Model
-	IngredientId int  `json:"ingredient_id" form:"ingredient_id"`
-	UserId       uint `json:"user_id" form:"user_id"`
 	Stock        int  `json:"stock" form:"stock"`
+	IngredientId uint `json:"ingredient_id" form:"ingredient_id"`
+	UserId       uint `json:"user_id" form:"user_id"`
 }
 
 type GormStockModel struct {

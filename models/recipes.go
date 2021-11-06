@@ -8,10 +8,10 @@ type Recipe struct {
 	gorm.Model
 	Name string `json:"name" form:"name"`
 
-	// many2many with category
-	Categories []*Category `gorm:"many2many:recipe_categories" json:"categories"`
-	// many2many with ingredient
-	Ingredients []*Ingredient `gorm:"many2many:recipe_ingredients" json:"ingredients"`
+	// One to Many with Recipe Category
+	RecipeCategories []RecipeCategories
+	// One to Many with Recipe Ingredient
+	RecipeIngredients []RecipeIngredients
 
 	// Category int `json:"category" form:"category"`
 }
