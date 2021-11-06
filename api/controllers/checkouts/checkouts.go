@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
+	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -45,6 +47,24 @@ func (controller *CheckoutController) CreateCheckoutController(c echo.Context) e
 			"message": "Internal Server Error",
 		})
 	}
+
+	recipeIdArr := strings.Split(c.Param("recipeId"), ",")
+	var recipeId []int
+	for _, v := range recipeIdArr {
+		value, _ := strconv.Atoi(v)
+		recipeId = append(recipeId, value)
+	}
+
+	for _, v := range recipeId {
+		if _, err := controller.checkoutModel.UpdateCheckoutIdOnCartDetails(v, int(output.ID)); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"success": false,
+				"code":    500,
+				"message": "Internal Server Error",
+			})
+		}
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,

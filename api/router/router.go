@@ -89,4 +89,7 @@ func Route(
 	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, jwtMiddleware)
 	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, jwtMiddleware)
 	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, jwtMiddleware)
+
+	// Checkouts
+	e.POST("/api/checkouts/:recipeId", checkoutController.CreateCheckoutController, jwtMiddleware)
 }

@@ -20,6 +20,7 @@ func NewCheckoutModel(db *gorm.DB) *GormCheckoutModel {
 
 type CheckoutModel interface {
 	CreateCheckout(checkout Checkout) (Checkout, error)
+	UpdateCheckoutIdOnCartDetails(recipeId, checkoutId int) (CartDetails, error)
 }
 
 func (m *GormCheckoutModel) CreateCheckout(checkout Checkout) (Checkout, error) {
@@ -27,4 +28,20 @@ func (m *GormCheckoutModel) CreateCheckout(checkout Checkout) (Checkout, error) 
 		return checkout, err
 	}
 	return checkout, nil
+}
+
+func (m *GormCheckoutModel) UpdateCheckoutIdOnCartDetails(recipeId, checkoutId int) (CartDetails, error) {
+	var cartDetails CartDetails
+	var newCartDetails CartDetails
+	if err := m.db.Find(&newCartDetails, "recipe_id = ?", recipeId).Error; err != nil {
+		return cartDetails, err
+	}
+
+	newCartDetails.CheckoutID = checkoutId
+	// newRecipe.Category = recipe.Category
+
+	if err := m.db.Save(&newCartDetails).Error; err != nil {
+		return newCartDetails, err
+	}
+	return newCartDetails, nil
 }
