@@ -30,6 +30,9 @@ type TransactionModel interface {
 	GetCheckoutId(cartId int) (int, error)
 	GetUserData(userId int) (Transaction, error)
 	CountTotalPayment(cartId, checkoutId int) (int, error)
+	Get(transactionId int) (Transaction, error)
+	Add(Transaction) (Transaction, error)
+	GetTotalPayment(transactionId int) (int, error)
 	// ChooseShippingPaymentMethod(checkoutId int, transaction Transaction) (Transaction, error)
 }
 
@@ -72,19 +75,23 @@ func (m *GormTransactionModel) CountTotalPayment(cartId, checkoutId int) (int, e
 	return countTotalPayment, nil
 }
 
-// func (m *GormTransactionModel) ChooseShippingPaymentMethod(checkoutId int, transaction Transaction) (Transaction, error) {
-// 	var newTransaction Transaction
-// 	var checkout Checkout
-// 	if err := m.db.Find(&checkout, checkoutId).Error; err != nil {
-// 		return transaction, err
-// 	}
+func (m *GormTransactionModel) GetTotalPayment(transactionId int) (int, error) {
+	var transaction Transaction
+	// var totalPayment int
+	if err := m.db.Find(&transaction, transactionId).Error; err != nil {
+		return transaction.TotalPayment, err
+	}
+	return transaction.TotalPayment, nil
+}
 
-// 	newTransaction.ShippingMethod = transaction.ShippingMethod
-// 	newTransaction.PaymentMethod = transaction.PaymentMethod
+func (m *GormTransactionModel) Get(transactionId int) (Transaction, error) {
+	var transaction Transaction
+	if err := m.db.Where("id=?", transactionId).First(&transaction).Error; err != nil {
+		return transaction, err
+	}
+	return transaction, nil
+}
 
-// 	if err := m.db.Save(&newTransaction).Error; err != nil {
-// 		return newTransaction, err
-// 	}
-
-// 	return newTransaction, nil
-// }
+func (m *GormTransactionModel) Add(transaction Transaction) (Transaction, error) {
+	return transaction, nil
+}

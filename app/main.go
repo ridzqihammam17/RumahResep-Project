@@ -14,6 +14,7 @@ import (
 	categoryControllers "rumah_resep/api/controllers/categories"
 	checkoutControllers "rumah_resep/api/controllers/checkouts"
 	ingredientControllers "rumah_resep/api/controllers/ingredient"
+	midtransControllers "rumah_resep/api/controllers/midtrans"
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
@@ -42,6 +43,7 @@ func main() {
 	cartDetailsModel := models.NewCartDetailsModel(db)
 	checkoutModel := models.NewCheckoutModel(db)
 	transactionModel := models.NewTransactionModel(db)
+	// midtransModel := models.NewMidtransModel(db)
 
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
@@ -55,13 +57,14 @@ func main() {
 	newCartDetailsController := cartDetailsControllers.NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientsModel, cartModel)
 	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
 	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
+	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
 
 	//create echo http with log
 	e := echo.New()
 	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
-	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController, newCartDetailsController, newCheckoutController, newTransactionController)
+	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController, newCartDetailsController, newCheckoutController, newTransactionController, newMidtransController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)
