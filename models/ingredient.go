@@ -68,7 +68,8 @@ func (m *GormIngredientModel) UpdateStock(ingredient Ingredient, ingredientId in
 
 	newIngredient.Stock = ingredient.Stock
 
-	if err := m.db.Save(&newIngredient).Error; err != nil {
+	if err := m.db.Raw("UPDATE ingredients SET stock = ? WHERE id = ?", ingredient.Stock, ingredientId).Scan(&newIngredient).Error; err != nil {
+		// if err := m.db.Save(&newIngredient).Error; err != nil {
 		return newIngredient, err
 	}
 	return newIngredient, nil
@@ -82,6 +83,7 @@ func (m *GormIngredientModel) UpdateIngredient(ingredient Ingredient, ingredient
 
 	newIngredient.Name = ingredient.Name
 	newIngredient.Price = ingredient.Price
+	newIngredient.Stock = ingredient.Stock
 
 	if err := m.db.Save(&newIngredient).Error; err != nil {
 		return newIngredient, err

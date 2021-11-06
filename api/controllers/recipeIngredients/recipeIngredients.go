@@ -40,6 +40,8 @@ func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c 
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
 		"data":    addIngredient,
 		"message": "Success Add Recipe Ingredient",
 	})
@@ -57,22 +59,10 @@ func (controller *RecipeIngredientsController) GetIngredientsByRecipeIdControlle
 		})
 	}
 
-	// type Response struct {
-	// 	Data    models.Ingredient `json:"data"`
-	// 	Message string            `json:"message"`
-	// }
-
-	// response := &Response{
-	// 	Data:    ingredient,
-	// 	Message: "Success Get Ingredient By Recipe Id",
-	// }
-
-	// var response Response
-	// fmt.Println(c.Param("recipeId"))
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
 		"data":    ingredient,
-		"message": "Success Get Recipe By Category ID",
+		"message": "Success Get Ingredients By Recipe ID",
 	})
 }
