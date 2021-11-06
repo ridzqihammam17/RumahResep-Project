@@ -12,8 +12,10 @@ type Ingredient struct {
 	Price int    `json:"price" form:"price"`
 	Stock int    `json:"stock" form:"stock"`
 
-	// many2many with recipe
-	Recipes []*Recipe `gorm:"many2many:recipe_ingredients" json:"recipe"`
+	Stocks []Stock
+
+	// One to Many with Recipe Ingredient
+	RecipeIngredients []RecipeIngredients
 }
 
 type GormIngredientModel struct {

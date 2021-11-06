@@ -4,10 +4,11 @@ import "gorm.io/gorm"
 
 type CartDetails struct {
 	gorm.Model
-	CartID   int `gorm:"primaryKey" json:"cart_id" form:"cart_id"`
-	RecipeID int `gorm:"primaryKey" json:"recipe_id" form:"recipe_id"`
-	Quantity int `json:"quantity" form:"quantity"`
-	Price    int `json:"price" form:"price"`
+	CartID     int `gorm:"primaryKey" json:"cart_id" form:"cart_id"`
+	RecipeID   int `gorm:"primaryKey" json:"recipe_id" form:"recipe_id"`
+	Quantity   int `json:"quantity" form:"quantity"`
+	Price      int `json:"price" form:"price"`
+	CheckoutID int
 }
 
 type RecipePriceResponse struct {

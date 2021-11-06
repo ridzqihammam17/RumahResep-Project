@@ -6,9 +6,9 @@ import (
 
 type RecipeIngredients struct {
 	gorm.Model
-	RecipeId      int `gorm:"primaryKey" json:"recipe_id" form:"recipe_id"`
-	IngredientId  int `gorm:"primaryKey" json:"ingredient_id" form:"ingredient_id"`
-	QtyIngredient int `json:"qty_ingredient" form:"qty_ingredient"`
+	QtyIngredient int  `json:"qty_ingredient" form:"qty_ingredient"`
+	RecipeId      uint `gorm:"primaryKey" json:"recipe_id" form:"recipe_id"`
+	IngredientId  uint `gorm:"primaryKey" json:"ingredient_id" form:"ingredient_id"`
 
 	// ;foreignKey:ingredient_id;joinForeignKey:ingredientsID;References:recipe_id;joinReferences:recipesID"
 }

@@ -87,7 +87,7 @@ func (controller *CartDetailsController) AddRecipeToCartController(c echo.Contex
 	idQtyIngredient, _ = controller.recipeIngredientsModel.GetIdIngredientQtyIngredient(cartDetails.RecipeID)
 
 	for i := 0; i < len(idQtyIngredient); i++ {
-		price, _ := controller.ingredientsModel.GetIngredientPrice(idQtyIngredient[i].IngredientId)
+		price, _ := controller.ingredientsModel.GetIngredientPrice(int(idQtyIngredient[i].IngredientId))
 		totalPrice += idQtyIngredient[i].QtyIngredient * price
 	}
 
@@ -155,7 +155,7 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 	idQtyingredient, _ = controller.recipeIngredientsModel.GetIdIngredientQtyIngredient(recipeId)
 	fmt.Println(idQtyingredient)
 	for i := 0; i < len(idQtyingredient); i++ {
-		price, _ := controller.ingredientsModel.GetIngredientPrice(idQtyingredient[i].IngredientId)
+		price, _ := controller.ingredientsModel.GetIngredientPrice(int(idQtyingredient[i].IngredientId))
 		totalPrice += idQtyingredient[i].QtyIngredient * price
 	}
 	// totalPrice *= cartDetails.Quantity
