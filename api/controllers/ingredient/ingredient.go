@@ -1,6 +1,7 @@
 package ingredient
 
 import (
+	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
@@ -31,8 +32,10 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 	//check role admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "Role is not Admin",
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized",
 		})
 	}
 
@@ -46,11 +49,17 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 	// create recipe
 	output, err := controller.IngredientModel.CreateIngredient(newIngredient)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Internal Server Error")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"recipe":  output,
+		"success": true,
+		"code":    200,
+		"data":    output,
 		"message": "Create Ingredient Success",
 	})
 }
@@ -58,82 +67,129 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 func (controller *IngredientController) GetAllIngredientController(c echo.Context) error {
 	ingredient, err := controller.IngredientModel.GetAllIngredient()
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
-	return c.JSON(http.StatusOK, ingredient)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"data":    ingredient,
+		"message": "Get All Ingredient Success",
+	})
 }
 
 func (controller *IngredientController) GetIngredientByIdController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	ingredient, err := controller.IngredientModel.GetIngredientById(id)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
 
-	return c.JSON(http.StatusOK, ingredient)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"data":    ingredient,
+		"message": "Get Ingredient By Id Success",
+	})
 }
 
 func (controller *IngredientController) UpdateIngredientController(c echo.Context) error {
 	// check admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "Role is not Admin",
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized",
 		})
 	}
 
 	// check id recipe
 	id, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	//bind recipe from request body
 	var ingredientRequest models.Ingredient
 	if err := c.Bind(&ingredientRequest); err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 	ingredient := models.Ingredient{
 		Name:  ingredientRequest.Name,
 		Price: ingredientRequest.Price,
+		Stock: ingredientRequest.Stock,
 	}
 
 	output, err := controller.IngredientModel.UpdateIngredient(ingredient, id)
 	if err != nil {
-		return c.String(http.StatusNotFound, "Data Not Found")
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"code":    404,
+			"message": "Not Found",
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
 		"data":    output,
-		"message": "Success Update Recipe",
+		"message": "Update Ingredient Success",
 	})
 }
 
 func (controller *IngredientController) UpdateIngredientStockController(c echo.Context) error {
 	// check admin or not
-	userId, role := middlewares.ExtractTokenUser(c)
+	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "Role is not Admin",
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized",
 		})
 	}
 
 	// check id recipe
-	id, err := strconv.Atoi(c.Param("ingredientId"))
+	ingredientId, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	//bind recipe from request body
-	var stockRequest models.Stock
 	var ingredientRequest models.Ingredient
-
 	if err := c.Bind(&ingredientRequest); err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 	ingredient := models.Ingredient{
 		Stock: ingredientRequest.Stock,
@@ -147,39 +203,65 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 		IngredientId: uint(id),
 		Stock:        ingredientRequest.Stock,
 	}
-
-	_, err2 := controller.IngredientModel.UpdateStock(ingredient, id)
+  
+	output1, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
 	if err2 != nil {
-		return c.String(http.StatusNotFound, "Data Not Found")
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"code":    404,
+			"message": "Not Found",
+		})
 	}
+	fmt.Println(output1)
 
-	output2, err3 := controller.StockModel.CreateStockUpdate(stock)
-	if err3 != nil {
-		return c.String(http.StatusNotFound, "Data Not Found")
-	}
+	// _, err3 := controller.StockModel.CreateStockUpdate(stock)
+	// if err3 != nil {
+	// 	return c.JSON(http.StatusNotFound, map[string]interface{}{
+	// 		"success": false,
+	// 		"code":    404,
+	// 		"message": "Not Found",
+	// 	})
+	// }
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data":    output2,
-		"message": "Success Update Recipe",
+		"success": true,
+		"code":    200,
+		"data":    output1,
+		"message": "Update Ingredient Stock Success",
 	})
 }
+
 func (controller *IngredientController) DeleteIngredientController(c echo.Context) error {
 	// check admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "Role is not Admin",
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized",
 		})
 	}
 
 	// check id recipe
 	id, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	if _, err := controller.IngredientModel.DeleteIngredient(id); err != nil {
-		return c.String(http.StatusNotFound, "Data Not Found")
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"code":    404,
+			"message": "Not Found",
+		})
 	}
-	return c.String(http.StatusOK, "Success Delete Recipe")
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Delete Ingredient",
+	})
 }

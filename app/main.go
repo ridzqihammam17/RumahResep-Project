@@ -14,9 +14,11 @@ import (
 	categoryControllers "rumah_resep/api/controllers/categories"
 	checkoutControllers "rumah_resep/api/controllers/checkouts"
 	ingredientControllers "rumah_resep/api/controllers/ingredient"
+	midtransControllers "rumah_resep/api/controllers/midtrans"
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
+	transactionControllers "rumah_resep/api/controllers/transactions"
 	stockControllers "rumah_resep/api/controllers/stocks"
 
 	"github.com/labstack/echo/v4"
@@ -41,6 +43,8 @@ func main() {
 	stockModel := models.NewStockModel(db)
 	cartDetailsModel := models.NewCartDetailsModel(db)
 	checkoutModel := models.NewCheckoutModel(db)
+	transactionModel := models.NewTransactionModel(db)
+	// midtransModel := models.NewMidtransModel(db)
 
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
@@ -53,6 +57,8 @@ func main() {
 	newRecipeIngredientsController := recipeIngredientsControllers.NewRecipeIngredientsController(recipeIngredientsModel, recipeModel, ingredientModel)
 	newCartDetailsController := cartDetailsControllers.NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientsModel, cartModel)
 	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
+	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
+	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
 	newStockController := stockControllers.NewStockController(stockModel)
 
 	//create echo http with log
@@ -60,7 +66,7 @@ func main() {
 	middlewares.LoggerMiddlewares(e)
 
 	//register API path and controller
-	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController, newCartDetailsController, newCheckoutController, newStockController)
+	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController, newCartDetailsController, newCheckoutController, newTransactionController, newMidtransController, newStockController)
 
 	// run server
 	address := fmt.Sprintf("localhost:%d", config.Port)

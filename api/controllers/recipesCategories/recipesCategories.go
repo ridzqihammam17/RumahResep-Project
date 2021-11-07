@@ -26,14 +26,6 @@ func NewRecipesCategoriesController(
 	}
 }
 
-// type RecipesCategories struct {
-// 	// gorm.Model
-// 	RecipeId   int `json:"recipes_id" form:"recipes_id"`
-// 	CategoryId int `json:"categories_id" form:"categories_id"`
-// 	// CreatedAt  time.Time
-// 	// DeletedAt  gorm.DeletedAt
-// }
-
 func (controller *RecipesCategoriesController) AddRecipeCategoriesController(c echo.Context) error {
 	var recipeCategories models.RecipeCategories
 	if err := c.Bind(&recipeCategories); err != nil {
