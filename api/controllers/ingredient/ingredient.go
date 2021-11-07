@@ -195,18 +195,15 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 		Stock: ingredientRequest.Stock,
 	}
 
-	// if err := c.Bind(&stockRequest); err != nil {
-	// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
-	// 		"success": false,
-	// 		"code":    400,
-	// 		"message": "Bad Request",
-	// 	})
-	// }
-	// stock := models.Stock{
-	// 	UserId: userId,
-	// 	Stock:  ingredientRequest.Stock,
-	// }
-
+	if err := c.Bind(&stockRequest); err != nil {
+		return c.String(http.StatusBadRequest, "Bad Request")
+	}
+	stock := models.Stock{
+		UserId:       userId,
+		IngredientId: uint(id),
+		Stock:        ingredientRequest.Stock,
+	}
+  
 	output1, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
 	if err2 != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{

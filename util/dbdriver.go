@@ -36,4 +36,5 @@ func DatabaseMigration(db *gorm.DB) {
 	db.AutoMigrate(models.Checkout{})
 	db.AutoMigrate(models.Transaction{})
 	// db.AutoMigrate(models.Payment{})
+	db.AutoMigrate(models.Stock{})
 }
