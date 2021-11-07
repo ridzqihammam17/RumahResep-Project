@@ -18,8 +18,8 @@ import (
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
-	transactionControllers "rumah_resep/api/controllers/transactions"
 	stockControllers "rumah_resep/api/controllers/stocks"
+	transactionControllers "rumah_resep/api/controllers/transactions"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -69,7 +69,7 @@ func main() {
 	router.Route(e, newAuthController, newCartController, newRecipeController, newCategoryController, newRecipesCategoriesController, newIngredientController, newRecipeIngredientsController, newCartDetailsController, newCheckoutController, newTransactionController, newMidtransController, newStockController)
 
 	// run server
-	address := fmt.Sprintf("localhost:%d", config.Port)
+	address := fmt.Sprintf(":%d", config.Port)
 
 	if err := e.Start(address); err != nil {
 		log.Info("shutting down the server")
