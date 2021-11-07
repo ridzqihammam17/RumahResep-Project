@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type Stock struct {
 	gorm.Model
-	Stock        int  `json:"stock" form:"stock"`
-	IngredientId uint `json:"ingredient_id" form:"ingredient_id"`
-	UserId       uint `json:"user_id" form:"user_id"`
+	IngredientId uint
+	Stock        int `json:"stock" form:"stock"`
+	UserId       uint
 }
 
 type GormStockModel struct {
@@ -18,11 +18,11 @@ func NewStockModel(db *gorm.DB) *GormStockModel {
 }
 
 type StockModel interface {
-	CreateStockUpdate(stock Stock) (Stock, error)
+	CreateStockUpdate(stock Stock, ingredientId int) (Stock, error)
 	GetRestockDate(daterange string) ([]Stock, error)
 }
 
-func (m *GormStockModel) CreateStockUpdate(stock Stock) (Stock, error) {
+func (m *GormStockModel) CreateStockUpdate(stock Stock, ingredientId int) (Stock, error) {
 	if err := m.db.Save(&stock).Error; err != nil {
 		return stock, err
 	}

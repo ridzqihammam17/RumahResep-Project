@@ -11,8 +11,8 @@ import (
 	recipeingredients "rumah_resep/api/controllers/recipeIngredients"
 	"rumah_resep/api/controllers/recipes"
 	recipescategories "rumah_resep/api/controllers/recipesCategories"
-	"rumah_resep/api/controllers/transactions"
 	stock "rumah_resep/api/controllers/stocks"
+	"rumah_resep/api/controllers/transactions"
 
 	"rumah_resep/constants"
 
@@ -77,13 +77,13 @@ func Route(
 	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, jwtMiddleware)
 	e.POST("/api/ingredients", ingredientController.CreateIngredientController, jwtMiddleware)
 	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, jwtMiddleware)
-	e.PUT("/api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, jwtMiddleware)
 	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Restock Date
 	// ------------------------------------------------------------------
-	e.GET("/api/stocks/:range", stockController.GetRestockDate, jwtMiddleware)
+	e.POST("/api/stocks/:ingredientId", stockController.CreateStockUpdateController, jwtMiddleware)
+	e.GET("/api/stocks/:range", stockController.GetRestockDateController, jwtMiddleware)
 
 	// Recipe Ingredients
 	// ------------------------------------------------------------------

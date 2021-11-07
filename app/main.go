@@ -18,8 +18,8 @@ import (
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
-	transactionControllers "rumah_resep/api/controllers/transactions"
 	stockControllers "rumah_resep/api/controllers/stocks"
+	transactionControllers "rumah_resep/api/controllers/transactions"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -59,7 +59,7 @@ func main() {
 	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
 	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
 	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
-	newStockController := stockControllers.NewStockController(stockModel)
+	newStockController := stockControllers.NewStockController(stockModel, ingredientModel)
 
 	//create echo http with log
 	e := echo.New()

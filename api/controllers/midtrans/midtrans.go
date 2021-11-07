@@ -28,7 +28,12 @@ func (controller *MidtransController) RequestPayment(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error Bosqu")
 	}
-	return c.JSON(http.StatusOK, redirectURL)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Request Payment",
+		"data":    redirectURL,
+	})
 }
 
 func (controller *MidtransController) StatusPayment(c echo.Context) error {
@@ -41,5 +46,10 @@ func (controller *MidtransController) StatusPayment(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error Bosqu")
 	}
-	return c.JSON(http.StatusOK, redirectURL)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Get Status Payment",
+		"data":    redirectURL,
+	})
 }

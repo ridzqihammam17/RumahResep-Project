@@ -360,77 +360,77 @@ func TestUpdateIngredientController(t *testing.T) {
 	assert.Equal(t, 1000, response.Data.Price)
 }
 
-func TestUpdateIngredientStockController(t *testing.T) {
-	// create database connection and create controller
-	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
-	userModel := models.NewUserModel(db)
-	userController := auth.NewAuthController(userModel)
+// func TestUpdateIngredientStockController(t *testing.T) {
+// 	// create database connection and create controller
+// 	config := config.GetConfig()
+// 	db := util.MysqlDatabaseConnection(config)
+// 	userModel := models.NewUserModel(db)
+// 	userController := auth.NewAuthController(userModel)
 
-	ingredientModel := models.NewIngredientModel(db)
-	stockModel := models.NewStockModel(db)
-	ingredientController := NewIngredientController(ingredientModel, stockModel)
+// 	ingredientModel := models.NewIngredientModel(db)
+// 	stockModel := models.NewStockModel(db)
+// 	ingredientController := NewIngredientController(ingredientModel, stockModel)
 
-	// Setting Route
-	e := echo.New()
-	e.POST("/api/login", userController.LoginUserController)
-	e.PUT("/api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, middleware.JWT([]byte(constants.SECRET_JWT)))
+// 	// Setting Route
+// 	e := echo.New()
+// 	e.POST("/api/login", userController.LoginUserController)
+// 	e.PUT("/api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
-	// Login Controller Success
-	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "admin@test.com",
-		"password": "passAdmin",
-	})
+// 	// Login Controller Success
+// 	reqBodyLogin, _ := json.Marshal(map[string]string{
+// 		"email":    "admin@test.com",
+// 		"password": "passAdmin",
+// 	})
 
-	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
-	loginReq.Header.Set("Content-Type", "application/json")
-	loginRes := httptest.NewRecorder()
-	e.ServeHTTP(loginRes, loginReq)
+// 	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
+// 	loginReq.Header.Set("Content-Type", "application/json")
+// 	loginRes := httptest.NewRecorder()
+// 	e.ServeHTTP(loginRes, loginReq)
 
-	type LoginResponse struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Token   string `json:"token"`
-	}
+// 	type LoginResponse struct {
+// 		Success bool   `json:"success"`
+// 		Code    int    `json:"code"`
+// 		Message string `json:"message"`
+// 		Token   string `json:"token"`
+// 	}
 
-	var loginResponse LoginResponse
-	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
+// 	var loginResponse LoginResponse
+// 	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
 
-	assert.Equal(t, true, loginResponse.Success)
-	assert.Equal(t, 200, loginResponse.Code)
-	assert.Equal(t, "Success Login", loginResponse.Message)
-	assert.NotEqual(t, "", loginResponse.Token)
+// 	assert.Equal(t, true, loginResponse.Success)
+// 	assert.Equal(t, 200, loginResponse.Code)
+// 	assert.Equal(t, "Success Login", loginResponse.Message)
+// 	assert.NotEqual(t, "", loginResponse.Token)
 
-	// Create Controller
-	reqBodyPut, _ := json.Marshal(map[string]interface{}{
-		"stock": 50,
-	})
-	req := httptest.NewRequest(echo.PUT, "/api/ingredients/stock/2", bytes.NewBuffer(reqBodyPut))
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
-	req.Header.Set("Content-Type", "application/json")
-	res := httptest.NewRecorder()
-	e.ServeHTTP(res, req)
+// 	// Create Controller
+// 	reqBodyPut, _ := json.Marshal(map[string]interface{}{
+// 		"stock": 50,
+// 	})
+// 	req := httptest.NewRequest(echo.PUT, "/api/ingredients/stock/2", bytes.NewBuffer(reqBodyPut))
+// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
+// 	req.Header.Set("Content-Type", "application/json")
+// 	res := httptest.NewRecorder()
+// 	e.ServeHTTP(res, req)
 
-	type Response struct {
-		Success bool              `json:"success"`
-		Code    int               `json:"code"`
-		Message string            `json:"message"`
-		Data    models.Ingredient `json:"data"`
-	}
+// 	type Response struct {
+// 		Success bool              `json:"success"`
+// 		Code    int               `json:"code"`
+// 		Message string            `json:"message"`
+// 		Data    models.Ingredient `json:"data"`
+// 	}
 
-	var response Response
-	json.Unmarshal(res.Body.Bytes(), &response)
+// 	var response Response
+// 	json.Unmarshal(res.Body.Bytes(), &response)
 
-	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, response.Code)
-	assert.Equal(t, "Update Ingredient Stock Success", response.Message)
-	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, uint(2), response.Data.ID)
-	assert.Equal(t, "Santan Kelapa", response.Data.Name)
-	assert.Equal(t, 50, response.Data.Stock)
-	assert.Equal(t, 3000, response.Data.Price)
-}
+// 	assert.Equal(t, true, response.Success)
+// 	assert.Equal(t, 200, response.Code)
+// 	assert.Equal(t, "Update Ingredient Stock Success", response.Message)
+// 	assert.NotEmpty(t, response.Data)
+// 	assert.Equal(t, uint(2), response.Data.ID)
+// 	assert.Equal(t, "Santan Kelapa", response.Data.Name)
+// 	assert.Equal(t, 50, response.Data.Stock)
+// 	assert.Equal(t, 3000, response.Data.Price)
+// }
 
 func TestDeleteIngredientController(t *testing.T) {
 	// create database connection and create controller

@@ -8,9 +8,10 @@ import (
 
 type Ingredient struct {
 	gorm.Model
-	Name  string `json:"name" form:"name"`
-	Price int    `json:"price" form:"price"`
-	Stock int    `json:"stock" form:"stock"`
+	Name   string `json:"name" form:"name"`
+	Price  int    `json:"price" form:"price"`
+	Stock  int    `json:"stock" form:"stock"`
+	UserID uint
 
 	Stocks []Stock
 
@@ -32,7 +33,7 @@ type IngredientModel interface {
 	GetIngredientById(ingredientId int) (Ingredient, error)
 	UpdateIngredient(ingredient Ingredient, ingredientId int) (Ingredient, error)
 	DeleteIngredient(ingredientId int) (Ingredient, error)
-	UpdateStock(ingredient Ingredient, ingredientId int) (Ingredient, error)
+	UpdateStock(stock Stock, ingredientId int) (Ingredient, error)
 	GetIngredientsByRecipeId(recipeId int) ([]Ingredient, error)
 	GetIngredientPrice(ingredientId int) (int, error)
 }
@@ -60,16 +61,15 @@ func (m *GormIngredientModel) GetIngredientById(ingredientId int) (Ingredient, e
 	return ingredient, nil
 }
 
-func (m *GormIngredientModel) UpdateStock(ingredient Ingredient, ingredientId int) (Ingredient, error) {
+func (m *GormIngredientModel) UpdateStock(stock Stock, ingredientId int) (Ingredient, error) {
 	var newIngredient Ingredient
 	if err := m.db.Find(&newIngredient, ingredientId).Error; err != nil {
-		return ingredient, err
+		return newIngredient, err
 	}
 
-	newIngredient.Stock = ingredient.Stock
+	newIngredient.Stock = stock.Stock
 
-	if err := m.db.Raw("UPDATE ingredients SET stock = ? WHERE id = ?", ingredient.Stock, ingredientId).Scan(&newIngredient).Error; err != nil {
-		// if err := m.db.Save(&newIngredient).Error; err != nil {
+	if err := m.db.Raw("UPDATE ingredients SET stock = stock + ? WHERE id = ?", stock.Stock, ingredientId).Scan(&newIngredient).Error; err != nil {
 		return newIngredient, err
 	}
 	return newIngredient, nil

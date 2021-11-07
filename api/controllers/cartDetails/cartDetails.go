@@ -49,7 +49,7 @@ func (controller *CartDetailsController) GetAllRecipeByCartIdController(c echo.C
 		})
 	}
 
-	return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
 		"message": "Success Get All Recipe In Cart",
@@ -225,7 +225,7 @@ func (controller *CartDetailsController) DeleteRecipeFromCartController(c echo.C
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Update Recipe Portion From Cart",
+		"message": "Success Delete Recipe From Cart",
 		"data":    output,
 	})
 }

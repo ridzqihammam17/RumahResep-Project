@@ -68,7 +68,7 @@ func (controller *CheckoutController) CreateCheckoutController(c echo.Context) e
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Add Recipe To Cart",
+		"message": "Success Create Checkout",
 		"data":    output,
 	})
 }
