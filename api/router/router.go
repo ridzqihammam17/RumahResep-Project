@@ -10,6 +10,7 @@ import (
 	recipeingredients "rumah_resep/api/controllers/recipeIngredients"
 	"rumah_resep/api/controllers/recipes"
 	recipescategories "rumah_resep/api/controllers/recipesCategories"
+	stock "rumah_resep/api/controllers/stocks"
 
 	"rumah_resep/constants"
 
@@ -28,6 +29,7 @@ func Route(
 	recipeIngredientsController *recipeingredients.RecipeIngredientsController,
 	cartDetailsController *cartdetails.CartDetailsController,
 	checkoutController *checkouts.CheckoutController,
+	stockController *stock.StockController,
 ) {
 	// ------------------------------------------------------------------
 	// Auth Login & Register
@@ -76,6 +78,11 @@ func Route(
 	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, jwtMiddleware)
 	e.PUT("/api/ingredients/stock/:ingredientId", ingredientController.UpdateIngredientStockController, jwtMiddleware)
 	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, jwtMiddleware)
+
+	// ------------------------------------------------------------------
+	// Restock Date
+	// ------------------------------------------------------------------
+	e.GET("/api/stocks/:range", stockController.GetRestockDate, jwtMiddleware)
 
 	// Recipe Ingredients
 	e.POST("/api/ingredients/recipe", recipeIngredientsController.AddIngredientsRecipeController, jwtMiddleware)
