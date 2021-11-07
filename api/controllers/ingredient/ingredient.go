@@ -143,8 +143,9 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
 	stock := models.Stock{
-		UserId: userId,
-		Stock:  ingredientRequest.Stock,
+		UserId:       userId,
+		IngredientId: uint(id),
+		Stock:        ingredientRequest.Stock,
 	}
 
 	_, err2 := controller.IngredientModel.UpdateStock(ingredient, id)
