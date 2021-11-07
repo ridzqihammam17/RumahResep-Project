@@ -1,7 +1,6 @@
 package ingredient
 
 import (
-	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
@@ -163,7 +162,7 @@ func (controller *IngredientController) UpdateIngredientController(c echo.Contex
 
 func (controller *IngredientController) UpdateIngredientStockController(c echo.Context) error {
 	// check admin or not
-	_, role := middlewares.ExtractTokenUser(c)
+	userId, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
@@ -183,6 +182,7 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 	}
 
 	//bind recipe from request body
+	var stockRequest models.Stock
 	var ingredientRequest models.Ingredient
 	if err := c.Bind(&ingredientRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -200,11 +200,11 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 	}
 	stock := models.Stock{
 		UserId:       userId,
-		IngredientId: uint(id),
+		IngredientId: uint(ingredientId),
 		Stock:        ingredientRequest.Stock,
 	}
-  
-	output1, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
+
+	_, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
 	if err2 != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{
 			"success": false,
@@ -212,21 +212,20 @@ func (controller *IngredientController) UpdateIngredientStockController(c echo.C
 			"message": "Not Found",
 		})
 	}
-	fmt.Println(output1)
 
-	// _, err3 := controller.StockModel.CreateStockUpdate(stock)
-	// if err3 != nil {
-	// 	return c.JSON(http.StatusNotFound, map[string]interface{}{
-	// 		"success": false,
-	// 		"code":    404,
-	// 		"message": "Not Found",
-	// 	})
-	// }
+	output2, err3 := controller.StockModel.CreateStockUpdate(stock)
+	if err3 != nil {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"code":    404,
+			"message": "Not Found",
+		})
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"data":    output1,
+		"data":    output2,
 		"message": "Update Ingredient Stock Success",
 	})
 }
