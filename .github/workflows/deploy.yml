@@ -15,6 +15,6 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd app
-          git pull origin main
+          git pull origin docker-ec2
           go test -v ./..
           docker-compose down && docker-compose up --build -d
