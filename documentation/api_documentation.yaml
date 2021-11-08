@@ -9,12 +9,12 @@ servers:
 tags:
   - name: Auth
     description: API Authentication
-  - name: Customers
-    description: API Customers
-  - name: Sellers
-    description: API Sellers
-  - name: Profiles
-    description: API Profiles
+  # - name: Customers
+  #   description: API Customers
+  # - name: Sellers
+  #   description: API Sellers
+  # - name: Profiles
+  #   description: API Profiles
   - name: Recipes
     description: API Recipes
   - name: Categories
@@ -109,112 +109,158 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/ServerError'
-  /customers/{id}:
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - Customers
-      summary: Get Customer by ID - Admin
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID For Spesific User
-          schema:
-            type: integer 
-      responses:
-        '200':
-          $ref: '#/components/responses/StatusOK'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      security:
-        - bearerAuth: []
-      tags:
-        - Customers
-      summary: Delete Customer by ID - Admin
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID For Spesific User
-          schema:
-            type: integer
-      responses:
-        '200':
-          $ref: "#/components/responses/StatusOK"
-        '400':
-          $ref: "#/components/responses/BadRequest"
-        '500':
-          $ref: '#/components/responses/ServerError'
+  # /customers/{id}:
+  #   get:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Customers
+  #     summary: Get Customer by ID - Admin
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: ID For Spesific User
+  #         schema:
+  #           type: integer 
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/StatusOK'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
+  #   delete:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Customers
+  #     summary: Delete Customer by ID - Admin
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: ID For Spesific User
+  #         schema:
+  #           type: integer
+  #     responses:
+  #       '200':
+  #         $ref: "#/components/responses/StatusOK"
+  #       '400':
+  #         $ref: "#/components/responses/BadRequest"
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
 
-  /sellers:
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - Sellers
-      summary: Get All Seller - Admin
-      responses:
-        '200':
-          $ref: '#/components/responses/StatusOK'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /sellers/{id}:
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - Sellers
-      summary: Get Seller by ID - Admin
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID For Spesific User
-          schema:
-            type: integer 
-      responses:
-        '200':
-          $ref: '#/components/responses/StatusOK'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      security:
-        - bearerAuth: []
-      tags:
-        - Sellers
-      summary: Delete Seller by ID - Admin
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID For Spesific User
-          schema:
-            type: integer
-      responses:
-        '200':
-          $ref: "#/components/responses/StatusOK"
-        '400':
-          $ref: "#/components/responses/BadRequest"
-        '500':
-          $ref: '#/components/responses/ServerError'
+  # /sellers:
+  #   get:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Sellers
+  #     summary: Get All Seller - Admin
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/StatusOK'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
+  # /sellers/{id}:
+  #   get:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Sellers
+  #     summary: Get Seller by ID - Admin
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: ID For Spesific User
+  #         schema:
+  #           type: integer 
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/StatusOK'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
+  #   delete:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Sellers
+  #     summary: Delete Seller by ID - Admin
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: ID For Spesific User
+  #         schema:
+  #           type: integer
+  #     responses:
+  #       '200':
+  #         $ref: "#/components/responses/StatusOK"
+  #       '400':
+  #         $ref: "#/components/responses/BadRequest"
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
 
   
-  /profiles/{id}:
+  # /profiles/{id}:
+  #   get:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Profiles
+  #     summary: Get Profile - Customer, Seller
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/StatusOK'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
+  #   put:
+  #     security:
+  #       - bearerAuth: []
+  #     tags:
+  #       - Profiles
+  #     summary: Edit Profile by ID - Customer, Seller
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: ID For Spesific Recipe
+  #         schema:
+  #           type: integer
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         'application/json':
+  #           schema:
+  #             type: object
+  #             properties:
+  #               name:
+  #                 type: string
+  #               price:
+  #                 type: integer
+  #               stock:
+  #                 type: integer
+  #     responses:
+  #       '200':
+  #         $ref: '#/components/responses/StatusOK'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/ServerError'
+
+  /recipes:
     get:
-      security:
-        - bearerAuth: []
       tags:
-        - Profiles
-      summary: Get Profile - Customer, Seller
+        - Recipes
+      summary: Get All Recipe - All User
       responses:
         '200':
           $ref: '#/components/responses/StatusOK'
@@ -222,19 +268,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/ServerError'
-    put:
+    post:
       security:
         - bearerAuth: []
       tags:
-        - Profiles
-      summary: Edit Profile by ID - Customer, Seller
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID For Spesific Recipe
-          schema:
-            type: integer
+        - Recipes
+      summary: Add Recipe - Admin
       requestBody:
         required: true
         content:
@@ -242,25 +281,10 @@ paths:
             schema:
               type: object
               properties:
-                name:
+                email:
                   type: string
-                price:
-                  type: integer
-                stock:
-                  type: integer
-      responses:
-        '200':
-          $ref: '#/components/responses/StatusOK'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/ServerError'
-
-  /recipes:
-    get:
-      tags:
-        - Recipes
-      summary: Get All Recipe - All User
+                password:
+                  type: string
       responses:
         '200':
           $ref: '#/components/responses/StatusOK'
