@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// -- Create Connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
@@ -53,7 +53,7 @@ func setup() {
 
 func TestAddRecipeToCartController(t *testing.T) {
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -128,7 +128,7 @@ func TestAddRecipeToCartController(t *testing.T) {
 
 func TestGetAllRecipeByCartIdController(t *testing.T) {
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -198,7 +198,7 @@ func TestGetAllRecipeByCartIdController(t *testing.T) {
 
 func TestUpdateRecipePortionController(t *testing.T) {
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -271,7 +271,7 @@ func TestUpdateRecipePortionController(t *testing.T) {
 
 func TestDeleteRecipeFromCartController(t *testing.T) {
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 

@@ -24,11 +24,14 @@ func NewRecipeIngredientsController(recipeIngredientsModel models.RecipeIngredie
 
 func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c echo.Context) error {
 	var recipeIngredients models.RecipeIngredients
-	c.Bind(&recipeIngredients)
-	// fmt.Println(c.Param("categoryId"))
-	// if err != nil {
-	// 	return c.String(http.StatusBadRequest, "Bad Request")
-	// }
+	if err := c.Bind(&recipeIngredients); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
 	categoryItem := models.RecipeIngredients{
 		RecipeId:      recipeIngredients.RecipeId,
 		IngredientId:  recipeIngredients.IngredientId,

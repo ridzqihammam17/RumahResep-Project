@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// create database connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// cleaning data before testing
 	db.Migrator().DropTable(&models.User{})
@@ -60,7 +60,6 @@ func setup() {
 	// dummy data for ingredient
 	var newIngredient models.Ingredient
 	newIngredient.Name = "Daging ayam dada"
-	newIngredient.Stock = 10
 	newIngredient.Price = 30000
 
 	// recipe dummy data with model
@@ -74,7 +73,7 @@ func setup() {
 func TestCreateIngredientController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -141,14 +140,13 @@ func TestCreateIngredientController(t *testing.T) {
 	assert.NotEmpty(t, response.Data)
 	assert.Equal(t, uint(2), response.Data.ID)
 	assert.Equal(t, "Santan Kelapa", response.Data.Name)
-	assert.Equal(t, 20, response.Data.Stock)
 	assert.Equal(t, 3000, response.Data.Price)
 }
 
 func TestGetAllIngredientController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -210,18 +208,16 @@ func TestGetAllIngredientController(t *testing.T) {
 	assert.Equal(t, 2, len(response.Data))
 	assert.Equal(t, uint(1), response.Data[0].ID)
 	assert.Equal(t, "Daging ayam dada", response.Data[0].Name)
-	assert.Equal(t, 10, response.Data[0].Stock)
 	assert.Equal(t, 30000, response.Data[0].Price)
 	assert.Equal(t, uint(2), response.Data[1].ID)
 	assert.Equal(t, "Santan Kelapa", response.Data[1].Name)
-	assert.Equal(t, 20, response.Data[1].Stock)
 	assert.Equal(t, 3000, response.Data[1].Price)
 }
 
 func TestGetRecipeByIdController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -282,14 +278,13 @@ func TestGetRecipeByIdController(t *testing.T) {
 	assert.NotEmpty(t, response.Data)
 	assert.Equal(t, uint(1), response.Data.ID)
 	assert.Equal(t, "Daging ayam dada", response.Data.Name)
-	assert.Equal(t, 10, response.Data.Stock)
 	assert.Equal(t, 30000, response.Data.Price)
 }
 
 func TestUpdateIngredientController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -356,14 +351,13 @@ func TestUpdateIngredientController(t *testing.T) {
 	assert.NotEmpty(t, response.Data)
 	assert.Equal(t, uint(1), response.Data.ID)
 	assert.Equal(t, "Bawang Merah", response.Data.Name)
-	assert.Equal(t, 15, response.Data.Stock)
 	assert.Equal(t, 1000, response.Data.Price)
 }
 
 // func TestUpdateIngredientStockController(t *testing.T) {
 // 	// create database connection and create controller
 // 	config := config.GetConfig()
-// 	db := util.MysqlDatabaseConnection(config)
+// 	db := util.MysqlDatabaseConnTest(config)
 // 	userModel := models.NewUserModel(db)
 // 	userController := auth.NewAuthController(userModel)
 
@@ -435,7 +429,7 @@ func TestUpdateIngredientController(t *testing.T) {
 func TestDeleteIngredientController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 

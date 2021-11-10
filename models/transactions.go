@@ -47,7 +47,7 @@ func (m *GormTransactionModel) GetCheckoutId(cartId int) (int, error) {
 	// var cartDetails CartDetails
 	var checkoutId int
 
-	if err := m.db.Raw("SELECT checkout_id FROM cart_details WHERE checkout_id IS NOT NULL AND cart_id = ?", cartId).Scan(&checkoutId).Error; err != nil {
+	if err := m.db.Raw("SELECT checkout_id FROM cart_details WHERE checkout_id IS NOT NULL AND checkout_id != 0 AND cart_id = ?", cartId).Scan(&checkoutId).Error; err != nil {
 		return checkoutId, err
 	}
 	return checkoutId, nil

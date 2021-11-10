@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// create database connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// cleaning data before testing
 	db.Migrator().DropTable(&models.User{})
@@ -61,7 +61,7 @@ func setup() {
 func TestAddRecipeCategoriesController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -131,7 +131,7 @@ func TestAddRecipeCategoriesController(t *testing.T) {
 func TestGetRecipeByCategoryId(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 

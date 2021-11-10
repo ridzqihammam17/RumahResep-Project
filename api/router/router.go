@@ -83,6 +83,7 @@ func Route(
 	// Restock Date
 	// ------------------------------------------------------------------
 	e.POST("/api/stocks/:ingredientId", stockController.CreateStockUpdateController, jwtMiddleware)
+	e.PUT("/api/stocks/:ingredientId", stockController.UpdateStockController, jwtMiddleware)
 	e.GET("/api/stocks/:range", stockController.GetRestockDateController, jwtMiddleware)
 
 	// Recipe Ingredients

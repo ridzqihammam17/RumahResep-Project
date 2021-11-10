@@ -30,8 +30,8 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 	}
 
 	//check role admin or not
-	userId, role := middlewares.ExtractTokenUser(c)
-	if role != "seller" {
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -43,26 +43,11 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 	newIngredient := models.Ingredient{
 		Name:  ingredient.Name,
 		Price: ingredient.Price,
-		Stock: ingredient.Stock,
 	}
 
 	// create recipe
 	output, err := controller.IngredientModel.CreateIngredient(newIngredient)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"code":    500,
-			"message": "Internal Server Error",
-		})
-	}
-
-	newStock := models.Stock{
-		IngredientId: ingredient.ID,
-		Stock:        ingredient.Stock,
-		UserId:       userId,
-	}
-
-	if _, err := controller.StockModel.CreateStockUpdate(newStock, int(ingredient.ID)); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
 			"code":    500,
@@ -125,8 +110,8 @@ func (controller *IngredientController) GetIngredientByIdController(c echo.Conte
 
 func (controller *IngredientController) UpdateIngredientController(c echo.Context) error {
 	// check admin or not
-	userId, role := middlewares.ExtractTokenUser(c)
-	if role != "seller" {
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -154,10 +139,8 @@ func (controller *IngredientController) UpdateIngredientController(c echo.Contex
 		})
 	}
 	ingredient := models.Ingredient{
-		Name:   ingredientRequest.Name,
-		Price:  ingredientRequest.Price,
-		Stock:  ingredientRequest.Stock,
-		UserID: userId,
+		Name:  ingredientRequest.Name,
+		Price: ingredientRequest.Price,
 	}
 
 	output, err := controller.IngredientModel.UpdateIngredient(ingredient, id)
@@ -252,7 +235,7 @@ func (controller *IngredientController) UpdateIngredientController(c echo.Contex
 func (controller *IngredientController) DeleteIngredientController(c echo.Context) error {
 	// check admin or not
 	_, role := middlewares.ExtractTokenUser(c)
-	if role != "seller" {
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,

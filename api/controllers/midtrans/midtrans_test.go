@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// create database connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// cleaning data before testing
 	db.Migrator().DropTable(&models.User{})
@@ -50,7 +50,7 @@ func setup() {
 func TestRequestPayment(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
@@ -115,7 +115,7 @@ func TestRequestPayment(t *testing.T) {
 func TestStatusPayment(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 

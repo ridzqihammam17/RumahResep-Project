@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// -- Create Connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
@@ -49,7 +49,7 @@ func setup() {
 func TestRegisterUserController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := NewAuthController(userModel)
 
@@ -91,7 +91,7 @@ func TestRegisterUserController(t *testing.T) {
 func TestValidLoginUserController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := NewAuthController(userModel)
 
@@ -129,7 +129,7 @@ func TestValidLoginUserController(t *testing.T) {
 func TestInvalidLoginUserController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := NewAuthController(userModel)
 

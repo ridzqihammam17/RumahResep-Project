@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// -- Create Connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
@@ -54,7 +54,7 @@ func setup() {
 func TestCreateCartController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 	cartModel := models.NewCartModel(db)

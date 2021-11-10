@@ -59,7 +59,7 @@ func main() {
 	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
 	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
 	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
-	newStockController := stockControllers.NewStockController(stockModel, ingredientModel)
+	newStockController := stockControllers.NewStockController(stockModel)
 
 	//create echo http with log
 	e := echo.New()

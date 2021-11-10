@@ -1,6 +1,7 @@
 package recipes
 
 import (
+	"fmt"
 	"net/http"
 	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
@@ -93,6 +94,7 @@ func (controller *RecipeController) GetAllRecipeController(c echo.Context) error
 
 func (controller *RecipeController) GetRecipeByIdController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("recipeId"))
+	fmt.Println(c.Param("recipeId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
