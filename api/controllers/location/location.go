@@ -226,7 +226,7 @@ func calculateDistance(start, end []string) (result int, err error) {
 
 	return (int)(value), nil
 }
-func calculateMultipleDistance(location [][]string) (result int, err error) {
+func calculateDistanceManyLocations(location [][]string) (result int, err error) {
   var total_distance = 0
   for i := 0; i < len(location)-1; i++{
         url := fmt.Sprintf(config.ThirdParty.GoogleMapsAPIUrl, location[i][0], location[i][1], location[i+1][0], location[i+1][1], config.ThirdParty.GoogleMapsAPIKey)
