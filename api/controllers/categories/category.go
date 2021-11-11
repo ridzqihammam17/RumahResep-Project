@@ -35,17 +35,10 @@ func NewCategoryController(categoryModel models.CategoryModel) *CategoryControll
 	}
 }
 
-// ------------------------------------------------------------------
-// Admin Authorize Check
-// ------------------------------------------------------------------
-func AuthorizeAdmin(c echo.Context) bool {
-	_, role := middlewares.ExtractTokenUser(c)
-	return role == "admin"
-}
-
 func (controller *CategoryController) GetAllCategoryController(c echo.Context) error {
-	checkAuthorize := AuthorizeAdmin(c)
-	if !checkAuthorize {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -53,7 +46,7 @@ func (controller *CategoryController) GetAllCategoryController(c echo.Context) e
 		})
 	}
 
-	category, err := controller.categoryModel.GetAll()
+	data, err := controller.categoryModel.GetAll()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -66,13 +59,14 @@ func (controller *CategoryController) GetAllCategoryController(c echo.Context) e
 		"success": true,
 		"code":    200,
 		"message": "Success Get All Category",
-		"data":    category,
+		"data":    data,
 	})
 }
 
 func (controller *CategoryController) GetCategoryController(c echo.Context) error {
-	checkAuthorize := AuthorizeAdmin(c)
-	if !checkAuthorize {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -81,7 +75,6 @@ func (controller *CategoryController) GetCategoryController(c echo.Context) erro
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -90,7 +83,7 @@ func (controller *CategoryController) GetCategoryController(c echo.Context) erro
 		})
 	}
 
-	category, err := controller.categoryModel.Get(id)
+	data, err := controller.categoryModel.Get(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -103,13 +96,14 @@ func (controller *CategoryController) GetCategoryController(c echo.Context) erro
 		"success": true,
 		"code":    200,
 		"message": "Success Get Category",
-		"data":    category,
+		"data":    data,
 	})
 }
 
 func (controller *CategoryController) InsertCategoryController(c echo.Context) error {
-	checkAuthorize := AuthorizeAdmin(c)
-	if !checkAuthorize {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -119,7 +113,12 @@ func (controller *CategoryController) InsertCategoryController(c echo.Context) e
 
 	var categoryRequest InsertCategoryRequest
 
-	if err := c.Bind(&categoryRequest); err != nil {
+	c.Bind(&categoryRequest)
+
+	category := models.Category{
+		Name: categoryRequest.Name,
+	}
+	if category.Name == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -127,12 +126,7 @@ func (controller *CategoryController) InsertCategoryController(c echo.Context) e
 		})
 	}
 
-	category := models.Category{
-		Name: categoryRequest.Name,
-	}
-
-	_, err := controller.categoryModel.Insert(category)
-
+	data, err := controller.categoryModel.Insert(category)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -145,12 +139,14 @@ func (controller *CategoryController) InsertCategoryController(c echo.Context) e
 		"success": true,
 		"code":    200,
 		"message": "Success Insert Category",
+		"data":    data,
 	})
 }
 
 func (controller *CategoryController) EditCategoryController(c echo.Context) error {
-	checkAuthorize := AuthorizeAdmin(c)
-	if !checkAuthorize {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -159,7 +155,6 @@ func (controller *CategoryController) EditCategoryController(c echo.Context) err
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -169,7 +164,13 @@ func (controller *CategoryController) EditCategoryController(c echo.Context) err
 	}
 
 	var categoryRequest EditCategoryRequest
-	if err := c.Bind(&categoryRequest); err != nil {
+
+	c.Bind(&categoryRequest)
+
+	category := models.Category{
+		Name: categoryRequest.Name,
+	}
+	if category.Name == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -177,11 +178,8 @@ func (controller *CategoryController) EditCategoryController(c echo.Context) err
 		})
 	}
 
-	category := models.Category{
-		Name: categoryRequest.Name,
-	}
-
-	if _, err := controller.categoryModel.Edit(category, id); err != nil {
+	data, err := controller.categoryModel.Edit(category, id)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -193,12 +191,14 @@ func (controller *CategoryController) EditCategoryController(c echo.Context) err
 		"success": true,
 		"code":    200,
 		"message": "Success Edit Category",
+		"data":    data,
 	})
 }
 
 func (controller *CategoryController) DeleteCategoryController(c echo.Context) error {
-	checkAuthorize := AuthorizeAdmin(c)
-	if !checkAuthorize {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
@@ -207,7 +207,6 @@ func (controller *CategoryController) DeleteCategoryController(c echo.Context) e
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,

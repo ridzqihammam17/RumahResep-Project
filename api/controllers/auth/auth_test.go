@@ -46,7 +46,7 @@ func setup() {
 	}
 }
 
-func TestRegisterUserController(t *testing.T) {
+func TestValidRegisterUserController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
@@ -58,7 +58,7 @@ func TestRegisterUserController(t *testing.T) {
 	e.POST("/api/register", authController.RegisterUserController)
 
 	// -- Input
-	reqBodyPost, _ := json.Marshal(map[string]string{
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{
 		"name":     "Buddy",
 		"email":    "buddy@gmail.com",
 		"password": "generate111",
@@ -88,6 +88,82 @@ func TestRegisterUserController(t *testing.T) {
 	assert.Equal(t, "Success Register Account", response.Message)
 }
 
+func TestInvalidRegisterUserControllerEmailNull(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := NewAuthController(userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/register", authController.RegisterUserController)
+
+	// -- Input
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{
+		"name":     "Buddy",
+		"password": "generate111",
+		"address":  "jl barat daya no 5",
+		"gender":   "laki",
+		"role":     "customer",
+	})
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.POST, "/api/register", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestInvalidRegisterUserControllerAllNull(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := NewAuthController(userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/register", authController.RegisterUserController)
+
+	// -- Input
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{})
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.POST, "/api/register", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 500, res.Code)
+	assert.Equal(t, "Internal Server Error", response.Message)
+}
+
 func TestValidLoginUserController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
@@ -100,7 +176,7 @@ func TestValidLoginUserController(t *testing.T) {
 	e.POST("/api/login", authController.LoginUserController)
 
 	// -- Input
-	reqBodyPost, _ := json.Marshal(map[string]string{
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{
 		"email":    "buddy@gmail.com",
 		"password": "generate111",
 	})
@@ -116,6 +192,7 @@ func TestValidLoginUserController(t *testing.T) {
 		Success bool   `json:"success"`
 		Code    int    `json:"code"`
 		Message string `json:"message"`
+		Token   string `json:"token"`
 	}
 	var response Response
 
@@ -124,6 +201,7 @@ func TestValidLoginUserController(t *testing.T) {
 	assert.Equal(t, true, response.Success)
 	assert.Equal(t, 200, res.Code)
 	assert.Equal(t, "Success Login", response.Message)
+	assert.NotEqual(t, "", response.Token)
 }
 
 func TestInvalidLoginUserController(t *testing.T) {
@@ -138,7 +216,7 @@ func TestInvalidLoginUserController(t *testing.T) {
 	e.POST("/api/login", authController.LoginUserController)
 
 	// -- Input
-	reqBodyPost, _ := json.Marshal(map[string]string{
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{
 		"email":    "buddy@gmail.com",
 		"password": "generate112",
 	})
