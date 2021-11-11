@@ -30,7 +30,7 @@ func (controller *CartController) CreateCartController(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
-			"message": "Role not Customer",
+			"message": "Unauthorized",
 		})
 	}
 
@@ -41,10 +41,10 @@ func (controller *CartController) CreateCartController(c echo.Context) error {
 
 	_, err := controller.cartModel.CreateCart(cart, int(userId))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
-			"code":    400,
-			"message": "Status Bad request",
+			"code":    500,
+			"message": "Internal Server Error",
 		})
 	}
 

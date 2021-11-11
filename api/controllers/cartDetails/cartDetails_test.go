@@ -58,18 +58,6 @@ func setup() {
 		fmt.Println(userModelErr)
 	}
 
-	// newUser.Name = "Rudi"
-	// newUser.Email = "rudi@mail.com"
-	// newUser.Password = "generate45"
-	// newUser.Address = "malang"
-	// newUser.Gender = "laki-laki"
-	// newUser.Role = "customer"
-
-	// _, userModelErr = userModel.Register(newUser)
-	// if userModelErr != nil {
-	// 	fmt.Println(userModelErr)
-	// }
-
 	newUser.Name = "Budi"
 	newUser.Email = "budi@mail.com"
 	newUser.Password = "generate999"
@@ -177,44 +165,6 @@ func AuthValid(t *testing.T) string {
 	return token
 }
 
-// func AuthDifferentUser(t *testing.T) string {
-// 	config := config.GetConfig()
-// 	db := util.MysqlDatabaseConnTest(config)
-// 	userModel := models.NewUserModel(db)
-// 	userController := auth.NewAuthController(userModel)
-
-// 	e := echo.New()
-// 	e.POST("/api/login", userController.LoginUserController)
-
-// 	reqBodyLogin, _ := json.Marshal(map[string]string{
-// 		"email":    "rudi@mail.com",
-// 		"password": "generate45",
-// 	})
-
-// 	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
-// 	loginReq.Header.Set("Content-Type", "application/json")
-// 	loginRes := httptest.NewRecorder()
-// 	e.ServeHTTP(loginRes, loginReq)
-
-// 	type LoginResponse struct {
-// 		Success bool   `json:"success"`
-// 		Code    int    `json:"code"`
-// 		Message string `json:"message"`
-// 		Token   string `json:"token"`
-// 	}
-
-// 	var loginResponse LoginResponse
-// 	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
-
-// 	assert.Equal(t, true, loginResponse.Success)
-// 	assert.Equal(t, 200, loginResponse.Code)
-// 	assert.Equal(t, "Success Login", loginResponse.Message)
-// 	assert.NotEqual(t, "", loginResponse.Token)
-
-// 	token := loginResponse.Token
-// 	return token
-// }
-
 func AuthInvalid(t *testing.T) string {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
@@ -294,6 +244,49 @@ func TestAddRecipeToCartAuthInvalidController(t *testing.T) {
 	assert.Equal(t, false, response.Success)
 	assert.Equal(t, 401, response.Code)
 	assert.NotEmpty(t, "Unauthorized", response.Message)
+}
+
+func TestAddRecipeToCartBadRequestController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"recipe_id": 0,
+		"quantity":  0,
+	}))
+
+	req := httptest.NewRequest(echo.POST, "/api/cartdetails", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
 }
 
 func TestAddRecipeToCartAuthValidController(t *testing.T) {
@@ -537,6 +530,48 @@ func TestUpdateRecipePortionStrconvInvalidController(t *testing.T) {
 		Success bool   `json:"success"`
 		Code    int    `json:"code"`
 		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestUpdateRecipePortionBadRequestController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	e := echo.New()
+	token := AuthValid(t)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"quantity": 0,
+	}))
+
+	req := httptest.NewRequest(echo.PUT, "/api/cartdetails/1", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
 	}
 
 	var response Response

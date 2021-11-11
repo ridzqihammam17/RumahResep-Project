@@ -22,7 +22,7 @@ func NewStockModel(db *gorm.DB) *GormStockModel {
 type StockModel interface {
 	CreateStockUpdate(stock Stock, ingredientId int) (Stock, error)
 	Restock(stock Stock, ingredientId int, useId int) (Stock, error)
-	StockDecrease(stock Stock, ingredientId int) (Stock, error)
+	StockDecrease(stock int, ingredientId int) (Stock, error)
 	GetRestockDate(daterange string) (Stock, error)
 }
 
@@ -42,13 +42,13 @@ func (m *GormStockModel) Restock(stock Stock, ingredientId int, userId int) (Sto
 	return stock, nil
 }
 
-func (m *GormStockModel) StockDecrease(stock Stock, ingredientId int) (Stock, error) {
-	var newStock = stock.Stock
+func (m *GormStockModel) StockDecrease(stock int, ingredientId int) (Stock, error) {
+	var newStock Stock
 
-	if err := m.db.Raw("UPDATE stocks SET stock = stock - ? WHERE ingredient_id = ?", newStock, ingredientId).Scan(&stock).Error; err != nil {
-		return stock, err
+	if err := m.db.Raw("UPDATE stocks SET stock = stock - ? WHERE ingredient_id = ?", stock, ingredientId).Scan(&newStock).Error; err != nil {
+		return newStock, err
 	}
-	return stock, nil
+	return newStock, nil
 }
 
 func (m *GormStockModel) GetRestockDate(daterange string) (Stock, error) {
