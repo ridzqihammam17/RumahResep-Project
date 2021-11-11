@@ -56,7 +56,7 @@ func main() {
 	newIngredientController := ingredientControllers.NewIngredientController(ingredientModel, stockModel)
 	newRecipeIngredientsController := recipeIngredientsControllers.NewRecipeIngredientsController(recipeIngredientsModel, recipeModel, ingredientModel)
 	newCartDetailsController := cartDetailsControllers.NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientsModel, cartModel)
-	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
+	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel, stockModel, recipeIngredientsModel)
 	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
 	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
 	newStockController := stockControllers.NewStockController(stockModel)

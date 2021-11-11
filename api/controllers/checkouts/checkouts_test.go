@@ -57,7 +57,9 @@ func TestCreateCheckoutController(t *testing.T) {
 	userController := auth.NewAuthController(userModel)
 
 	checkoutModel := models.NewCheckoutModel(db)
-	checkoutController := NewCheckoutController(checkoutModel)
+	stockModel := models.NewStockModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel)
 
 	// Setting Route
 	e := echo.New()

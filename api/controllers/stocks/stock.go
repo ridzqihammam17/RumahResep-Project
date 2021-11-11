@@ -91,7 +91,7 @@ func (controller *StockController) UpdateStockController(c echo.Context) error {
 		UserId:       userId,
 	}
 
-	output, err := controller.stockModel.UpdateStock(newStock, ingredientId, int(userId))
+	output, err := controller.stockModel.Restock(newStock, ingredientId, int(userId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
