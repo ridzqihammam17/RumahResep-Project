@@ -15,6 +15,6 @@ jobs:
         port: 22
         script: |
           cd app
-          git pull origin docker-ec2
+          git pull origin main
           go test -v ./..
           docker-compose down && docker-compose up --build -d
