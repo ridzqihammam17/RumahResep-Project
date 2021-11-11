@@ -14,20 +14,6 @@ services:
       test: ["CMD", "mysql", "-u", "root",  "-proot", "-e", "show schemas"]
       interval: 10s
 
-  appDb1:
-    image: bitnami/mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dbrumahreseptest
-    ports: 
-      - 3306:3306
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysql", "-u", "root",  "-proot", "-e", "show schemas"]
-      interval: 10s 
-
   app:
     build: .
     restart: always
