@@ -12,7 +12,7 @@ type User struct {
 	Name      string  `json:"name" form:"name"`
 	Address   string  `json:"address" form:"address"`
 	Latitude  float64 `json:"latitude" form:"latitude"`
-	Longitude float64 `json:"laongitude" form:"longitude"`
+	Longitude float64 `json:"longitude" form:"longitude"`
 	Email     string  `json:"email" form:"email"`
 	Password  string  `json:"password" form:"password"`
 	Gender    string  `json:"gender" form:"gender"`
