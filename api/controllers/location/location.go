@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	_ "sync"
 	_ "sync/atomic"
@@ -45,36 +44,36 @@ func validateLatLong(latitude, longitude string) bool {
 	return re.MatchString(latitude + "," + longitude)
 }
 
-func (address *Address) FormatAddress() string {
+// func (address *Address) FormatAddress() string {
 
-	// Creats a slice with all content from the Address struct
-	var content []string
-	if address.Number > 0 {
-		content = append(content, strconv.Itoa(address.Number))
-	}
-	content = append(content, address.Street)
-	content = append(content, address.Neighborhood)
-	content = append(content, address.District)
-	content = append(content, address.PostalCode)
-	content = append(content, address.City)
-	content = append(content, address.County)
-	content = append(content, address.State)
-	content = append(content, address.Country)
+// 	// Creats a slice with all content from the Address struct
+// 	var content []string
+// 	if address.Number > 0 {
+// 		content = append(content, strconv.Itoa(address.Number))
+// 	}
+// 	content = append(content, address.Street)
+// 	content = append(content, address.Neighborhood)
+// 	content = append(content, address.District)
+// 	content = append(content, address.PostalCode)
+// 	content = append(content, address.City)
+// 	content = append(content, address.County)
+// 	content = append(content, address.State)
+// 	content = append(content, address.Country)
 
-	var formattedAddress string
+// 	var formattedAddress string
 
-	// For each value in the content slice check if it is valid
-	// and add to the formattedAddress string
-	for _, value := range content {
-		if value != "" {
-			if formattedAddress != "" {
-				formattedAddress += ", "
-			}
-			formattedAddress += value
-		}
-	}
-	return formattedAddress
-}
+// 	// For each value in the content slice check if it is valid
+// 	// and add to the formattedAddress string
+// 	for _, value := range content {
+// 		if value != "" {
+// 			if formattedAddress != "" {
+// 				formattedAddress += ", "
+// 			}
+// 			formattedAddress += value
+// 		}
+// 	}
+// 	return formattedAddress
+// }
 
 // httpRequest function send the HTTP request, decode the JSON
 // and return a Results structure
