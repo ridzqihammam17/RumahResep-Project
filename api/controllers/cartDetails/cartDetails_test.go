@@ -31,9 +31,17 @@ func setup() {
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
+	db.Migrator().DropTable(&models.Recipe{})
+	db.Migrator().DropTable(&models.Ingredient{})
+	db.Migrator().DropTable(&models.RecipeIngredients{})
+	db.Migrator().DropTable(&models.Cart{})
 	db.Migrator().DropTable(&models.CartDetails{})
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Category{})
+	db.AutoMigrate(&models.Recipe{})
+	db.AutoMigrate(&models.Ingredient{})
+	db.AutoMigrate(&models.RecipeIngredients{})
+	db.AutoMigrate(&models.Cart{})
+	db.AutoMigrate(&models.CartDetails{})
 
 	// -- Dummy Data
 	var newUser models.User
@@ -49,6 +57,74 @@ func setup() {
 	if userModelErr != nil {
 		fmt.Println(userModelErr)
 	}
+
+	newUser.Name = "Budi"
+	newUser.Email = "budi@mail.com"
+	newUser.Password = "generate999"
+	newUser.Address = "jakarta"
+	newUser.Gender = "laki-laki"
+	newUser.Role = "admin"
+
+	_, userModelErr = userModel.Register(newUser)
+	if userModelErr != nil {
+		fmt.Println(userModelErr)
+	}
+
+	var newRecipe models.Recipe
+	newRecipe.Name = "Soto Ayam"
+
+	recipeModel := models.NewRecipeModel(db)
+	_, recipeModelErr := recipeModel.CreateRecipe(newRecipe)
+	if recipeModelErr != nil {
+		fmt.Println(recipeModelErr)
+	}
+
+	var newIngredient models.Ingredient
+	newIngredient.Name = "Bawang Merah"
+	newIngredient.Price = 500
+
+	ingredientModel := models.NewIngredientModel(db)
+	_, ingredientModelErr := ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	newIngredient.Name = "Daging Ayam"
+	newIngredient.Price = 4000
+
+	_, ingredientModelErr = ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	var newRecipeIngredient models.RecipeIngredients
+	newRecipeIngredient.RecipeId = 1
+	newRecipeIngredient.IngredientId = 1
+	newRecipeIngredient.QtyIngredient = 5
+
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	_, recipeIngredientErr := recipeIngredientModel.AddIngredientsRecipe(newRecipeIngredient)
+	if recipeIngredientErr != nil {
+		fmt.Println(recipeIngredientErr)
+	}
+
+	newRecipeIngredient.RecipeId = 1
+	newRecipeIngredient.IngredientId = 2
+	newRecipeIngredient.QtyIngredient = 1
+
+	_, recipeIngredientErr = recipeIngredientModel.AddIngredientsRecipe(newRecipeIngredient)
+	if recipeIngredientErr != nil {
+		fmt.Println(recipeIngredientErr)
+	}
+
+	var newCart models.Cart
+	newCart.UserID = 1
+	cartModel := models.NewCartModel(db)
+	_, cartErr := cartModel.CreateCart(newCart, int(newCart.UserID))
+	if cartErr != nil {
+		fmt.Println(cartErr)
+	}
+
 }
 
 func TestAddRecipeToCartController(t *testing.T) {
@@ -123,7 +199,7 @@ func TestAddRecipeToCartController(t *testing.T) {
 	assert.Equal(t, 1, response.Data.CartID)
 	assert.Equal(t, 1, response.Data.RecipeID)
 	assert.Equal(t, 1, response.Data.Quantity)
-	assert.Equal(t, 55000, response.Data.Price)
+	assert.Equal(t, 6500, response.Data.Price)
 }
 
 func TestGetAllRecipeByCartIdController(t *testing.T) {
@@ -193,7 +269,7 @@ func TestGetAllRecipeByCartIdController(t *testing.T) {
 	assert.Equal(t, 1, response.Data[0].CartID)
 	assert.Equal(t, 1, response.Data[0].RecipeID)
 	assert.Equal(t, 1, response.Data[0].Quantity)
-	assert.Equal(t, 55000, response.Data[0].Price)
+	assert.Equal(t, 6500, response.Data[0].Price)
 }
 
 func TestUpdateRecipePortionController(t *testing.T) {
@@ -267,6 +343,7 @@ func TestUpdateRecipePortionController(t *testing.T) {
 	assert.Equal(t, 1, response.Data.CartID)
 	assert.Equal(t, 1, response.Data.RecipeID)
 	assert.Equal(t, 2, response.Data.Quantity)
+	assert.Equal(t, 13000, response.Data.Price)
 }
 
 func TestDeleteRecipeFromCartController(t *testing.T) {
