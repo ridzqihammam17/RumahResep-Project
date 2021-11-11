@@ -226,3 +226,67 @@ func calculateDistance(start, end []string) (result int, err error) {
 
 	return (int)(value), nil
 }
+func calculateMultipleDistance(location [][]string) (result int, err error) {
+  var total_distance = 0
+  for i := 0; i < len(location)-1; i++{
+        url := fmt.Sprintf(config.ThirdParty.GoogleMapsAPIUrl, location[i][0], location[i][1], location[i+1][0], location[i+1][1], config.ThirdParty.GoogleMapsAPIKey)
+        defer logrus.Info(url, result)
+	response, err := http.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var obj map[string]interface{}
+	err = json.Unmarshal(contents, &obj)
+	if err != nil {
+		return 0, err
+	}
+	rows, ok := obj["rows"].([]interface{})
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	if len(rows) == 0 {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	row, ok := rows[0].(map[string]interface{})
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	elements, ok := row["elements"].([]interface{})
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	if len(elements) == 0 {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	element, ok := elements[0].(map[string]interface{})
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	status, ok := element["status"].(string)
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	if status == "ZERO_RESULTS" {
+		return 0, nil
+	}
+	if status != "OK" {
+		return 0, errors.New(status)
+	}
+	distance, ok := element["distance"].(map[string]interface{})
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+	value, ok := distance["value"].(float64)
+	if ok == false {
+		return 0, errors.New("CALCULATE_FAILED")
+	}
+  total_distance += (int)(value)
+}
+	return (int)(total_distance), nil
+}
