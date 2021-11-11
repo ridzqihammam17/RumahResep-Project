@@ -61,7 +61,7 @@ func (m *GormCartDetailsModel) UpdateRecipePortion(newCartDetails CartDetails, r
 	}
 
 	cartDetails.Quantity = newCartDetails.Quantity
-	// cartDetails.Price = newCartDetails.Price
+	cartDetails.Price = newCartDetails.Price
 
 	if err := m.db.Save(&cartDetails).Error; err != nil {
 		return cartDetails, err

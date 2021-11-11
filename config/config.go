@@ -13,6 +13,7 @@ type AppConfig struct {
 	Database struct {
 		Driver     string
 		Connection string
+		ConnTest   string
 	}
 }
 
@@ -69,7 +70,8 @@ func InitConfig() *AppConfig {
 
 	defaultConfig.Port = httpPort
 	defaultConfig.Database.Driver = "mysql"
-	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbRumahResep?charset=utf8&parseTime=True&loc=Local")
+	defaultConfig.Database.Connection = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbrumahresep?charset=utf8&parseTime=True&loc=Local")
+	defaultConfig.Database.ConnTest = getEnv("CONNECTION_STRING", "root:root@tcp(localhost:3306)/dbrumahreseptest?charset=utf8&parseTime=True&loc=Local")
 
 	ThirdParty = ThirdPartyConfig{
 		GoogleMapsAPIKey:        getEnv("ThirdParty.GoogleMapsAPIKey", ""),

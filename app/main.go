@@ -18,8 +18,8 @@ import (
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
 	recipeCategoriesControllers "rumah_resep/api/controllers/recipesCategories"
-	transactionControllers "rumah_resep/api/controllers/transactions"
 	stockControllers "rumah_resep/api/controllers/stocks"
+	transactionControllers "rumah_resep/api/controllers/transactions"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -56,7 +56,7 @@ func main() {
 	newIngredientController := ingredientControllers.NewIngredientController(ingredientModel, stockModel)
 	newRecipeIngredientsController := recipeIngredientsControllers.NewRecipeIngredientsController(recipeIngredientsModel, recipeModel, ingredientModel)
 	newCartDetailsController := cartDetailsControllers.NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientsModel, cartModel)
-	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel)
+	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel, stockModel, recipeIngredientsModel)
 	newTransactionController := transactionControllers.NewTransactionController(transactionModel, cartModel, userModel)
 	newMidtransController := midtransControllers.NewMidtransController(transactionModel)
 	newStockController := stockControllers.NewStockController(stockModel)

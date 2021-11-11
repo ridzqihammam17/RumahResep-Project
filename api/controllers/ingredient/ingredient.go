@@ -24,6 +24,7 @@ func NewIngredientController(IngredientModel models.IngredientModel, StockModel 
 
 func (controller *IngredientController) CreateIngredientController(c echo.Context) error {
 	var ingredient models.Ingredient
+
 	if err := c.Bind(&ingredient); err != nil {
 		return c.String(http.StatusBadRequest, "Bad Request")
 	}
@@ -42,7 +43,6 @@ func (controller *IngredientController) CreateIngredientController(c echo.Contex
 	newIngredient := models.Ingredient{
 		Name:  ingredient.Name,
 		Price: ingredient.Price,
-		Stock: ingredient.Stock,
 	}
 
 	// create recipe
@@ -141,7 +141,6 @@ func (controller *IngredientController) UpdateIngredientController(c echo.Contex
 	ingredient := models.Ingredient{
 		Name:  ingredientRequest.Name,
 		Price: ingredientRequest.Price,
-		Stock: ingredientRequest.Stock,
 	}
 
 	output, err := controller.IngredientModel.UpdateIngredient(ingredient, id)
@@ -160,75 +159,78 @@ func (controller *IngredientController) UpdateIngredientController(c echo.Contex
 	})
 }
 
-func (controller *IngredientController) UpdateIngredientStockController(c echo.Context) error {
-	// check admin or not
-	userId, role := middlewares.ExtractTokenUser(c)
-	if role != "admin" {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"success": false,
-			"code":    401,
-			"message": "Unauthorized",
-		})
-	}
+// func (controller *IngredientController) UpdateIngredientStockController(c echo.Context) error {
+// 	// check admin or not
+// 	userId, role := middlewares.ExtractTokenUser(c)
+// 	if role != "seller" {
+// 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+// 			"success": false,
+// 			"code":    401,
+// 			"message": "Unauthorized",
+// 		})
+// 	}
 
-	// check id recipe
-	ingredientId, err := strconv.Atoi(c.Param("ingredientId"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
+// 	// check id recipe
+// 	ingredientId, err := strconv.Atoi(c.Param("ingredientId"))
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+// 			"success": false,
+// 			"code":    400,
+// 			"message": "Bad Request",
+// 		})
+// 	}
 
-	//bind recipe from request body
-	var stockRequest models.Stock
-	var ingredientRequest models.Ingredient
-	if err := c.Bind(&ingredientRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
-	ingredient := models.Ingredient{
-		Stock: ingredientRequest.Stock,
-	}
+// 	//bind recipe from request body
+// 	var stockRequest models.Stock
+// 	if err := c.Bind(&stockRequest); err != nil {
+// 		return c.String(http.StatusBadRequest, "Bad Request")
+// 	}
+// 	// var ingredientRequest models.Ingredient
+// 	// if err := c.Bind(&ingredientRequest); err != nil {
+// 	// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+// 	// 		"success": false,
+// 	// 		"code":    400,
+// 	// 		"message": "Bad Request",
+// 	// 	})
+// 	// }
+// 	// ingredient := models.Ingredient{
+// 	// 	Stock: ingredientRequest.Stock,
+// 	// }
 
-	if err := c.Bind(&stockRequest); err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
-	}
-	stock := models.Stock{
-		UserId:       userId,
-		IngredientId: uint(ingredientId),
-		Stock:        ingredientRequest.Stock,
-	}
+// 	// if err := c.Bind(&ingredientRequest); err != nil {
+// 	// 	return c.String(http.StatusBadRequest, "Bad Request")
+// 	// }
+// 	stock := models.Stock{
+// 		UserId:       userId,
+// 		IngredientId: uint(ingredientId),
+// 		Stock:        stockRequest.Stock,
+// 	}
 
-	_, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
-	if err2 != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
-			"success": false,
-			"code":    404,
-			"message": "Not Found",
-		})
-	}
+// 	// _, err2 := controller.IngredientModel.UpdateStock(ingredient, ingredientId)
+// 	// if err2 != nil {
+// 	// 	return c.JSON(http.StatusNotFound, map[string]interface{}{
+// 	// 		"success": false,
+// 	// 		"code":    404,
+// 	// 		"message": "Not Found",
+// 	// 	})
+// 	// }
 
-	output2, err3 := controller.StockModel.CreateStockUpdate(stock)
-	if err3 != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
-			"success": false,
-			"code":    404,
-			"message": "Not Found",
-		})
-	}
+// 	output2, err3 := controller.StockModel.CreateStockUpdate(stock, ingredientId)
+// 	if err3 != nil {
+// 		return c.JSON(http.StatusNotFound, map[string]interface{}{
+// 			"success": false,
+// 			"code":    404,
+// 			"message": "Not Found",
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"code":    200,
-		"data":    output2,
-		"message": "Update Ingredient Stock Success",
-	})
-}
+// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 		"success": true,
+// 		"code":    200,
+// 		"data":    output2,
+// 		"message": "Update Ingredient Stock Success",
+// 	})
+// }
 
 func (controller *IngredientController) DeleteIngredientController(c echo.Context) error {
 	// check admin or not

@@ -1,4 +1,4 @@
-package recipescategories
+package stock
 
 import (
 	"bytes"
@@ -30,55 +30,44 @@ func setup() {
 
 	// cleaning data before testing
 	db.Migrator().DropTable(&models.User{})
-	db.Migrator().DropTable(&models.RecipeCategories{})
+	db.Migrator().DropTable(&models.Stock{})
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.RecipeCategories{})
+	db.AutoMigrate(&models.Stock{})
 
 	// preparate dummy data
-	// dummy data for admin
+	// dummy data for seller
 	var newUser models.User
-	newUser.Name = "Admin A"
-	newUser.Email = "admin@test.com"
-	newUser.Password = "passAdmin"
-	newUser.Role = "admin"
+	newUser.Name = "Yudi"
+	newUser.Address = "Tangerang"
+	newUser.Email = "yudi@test.com"
+	newUser.Password = "yudi77"
+	newUser.Role = "seller"
 	userModel := models.NewUserModel(db)
 	_, err := userModel.Register(newUser)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// dummy data for recipe
-	var newRecipeCategory models.RecipeCategories
-	newRecipeCategory.RecipeId = 1
-	newRecipeCategory.CategoryId = 1
-
-	recipeCategoryModel := models.NewRecipesCategoriesModel(db)
-	_, err = recipeCategoryModel.AddRecipeCategories(newRecipeCategory)
-	if err != nil {
-		fmt.Println(err)
-	}
 }
 
-func TestAddRecipeCategoriesController(t *testing.T) {
+func TestCreateStockUpdateController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
-	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
-	recipesModel := models.NewRecipeModel(db)
-	categoriesModel := models.NewCategoryModel(db)
-	recipeCategoriesController := NewRecipesCategoriesController(recipeCategoriesModel, recipesModel, categoriesModel)
+	stockModel := models.NewStockModel(db)
+	stockController := NewStockController(stockModel)
 
 	// Setting Route
 	e := echo.New()
 	e.POST("/api/login", userController.LoginUserController)
-	e.POST("/api/recipe/categories", recipeCategoriesController.AddRecipeCategoriesController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.POST("/api/stocks/:ingredientId", stockController.CreateStockUpdateController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// Login Controller
 	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "admin@test.com",
-		"password": "passAdmin",
+		"email":    "yudi@test.com",
+		"password": "yudi77",
 	})
 
 	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
@@ -101,54 +90,53 @@ func TestAddRecipeCategoriesController(t *testing.T) {
 	assert.Equal(t, "Success Login", loginResponse.Message)
 	assert.NotEqual(t, "", loginResponse.Token)
 
-	// Add Recipe Categories Controller
+	// Get All Controller
 	reqBodyPost, _ := json.Marshal(map[string]int{
-		"recipes_id":    2,
-		"categories_id": 1,
+		"stock": 30,
 	})
-	req := httptest.NewRequest(echo.POST, "/api/recipe/categories", bytes.NewBuffer(reqBodyPost))
+
+	req := httptest.NewRequest(echo.POST, "/api/stocks/8", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)
 
 	type Response struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
+		Success bool         `json:"success"`
+		Code    int          `json:"code"`
+		Message string       `json:"message"`
+		Data    models.Stock `json:"data"`
 	}
 
 	var response Response
 	json.Unmarshal(res.Body.Bytes(), &response)
+	fmt.Println(response)
 
 	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, response.Code)
-	assert.Equal(t, "Success Add Recipe Category", response.Message)
-	// assert.NotEmpty(t, response.Data)
-	// assert.Equal(t, 2, len(response.Data))
+	assert.Equal(t, 200, res.Code)
+	assert.NotEmpty(t, response.Data)
+	assert.Equal(t, 30, response.Data.Stock)
 }
 
-func TestGetRecipeByCategoryId(t *testing.T) {
+func TestGetRestockDateController(t *testing.T) {
 	// create database connection and create controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
-	recipeCategoriesModel := models.NewRecipesCategoriesModel(db)
-	recipesModel := models.NewRecipeModel(db)
-	categoriesModel := models.NewCategoryModel(db)
-	recipeCategoriesController := NewRecipesCategoriesController(recipeCategoriesModel, recipesModel, categoriesModel)
+	stockModel := models.NewStockModel(db)
+	stockController := NewStockController(stockModel)
 
 	// Setting Route
 	e := echo.New()
 	e.POST("/api/login", userController.LoginUserController)
-	e.GET("/api/recipe/categories/:categoryId", recipeCategoriesController.GetRecipeByCategoryIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/stocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// Login Controller
 	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "admin@test.com",
-		"password": "passAdmin",
+		"email":    "yudi@test.com",
+		"password": "yudi77",
 	})
 
 	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
@@ -171,18 +159,18 @@ func TestGetRecipeByCategoryId(t *testing.T) {
 	assert.Equal(t, "Success Login", loginResponse.Message)
 	assert.NotEqual(t, "", loginResponse.Token)
 
-	// Add Recipe Categories Controller
-	req := httptest.NewRequest(echo.GET, "/api/recipe/categories/1", nil)
+	// Get All Controller
+	req := httptest.NewRequest(echo.GET, "/api/stocks/daily", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)
 
 	type Response struct {
-		Success bool                      `json:"success"`
-		Code    int                       `json:"code"`
-		Message string                    `json:"message"`
-		Data    []models.RecipeCategories `json:"data"`
+		Success bool           `json:"success"`
+		Code    int            `json:"code"`
+		Message string         `json:"message"`
+		Data    []models.Stock `json:"data"`
 	}
 
 	var response Response
@@ -190,9 +178,6 @@ func TestGetRecipeByCategoryId(t *testing.T) {
 
 	assert.Equal(t, true, response.Success)
 	assert.Equal(t, 200, response.Code)
-	assert.Equal(t, "Success Get Recipe By Category ID", response.Message)
-	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, 2, len(response.Data))
-	assert.Equal(t, 1, response.Data[0].RecipeId)
-	assert.Equal(t, 2, response.Data[1].RecipeId)
+	assert.Equal(t, "Success Get Restock Date", response.Message)
+	// assert.NotEmpty(t, response.Data)
 }

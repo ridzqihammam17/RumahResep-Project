@@ -11,12 +11,16 @@ import (
 )
 
 type CheckoutController struct {
-	checkoutModel models.CheckoutModel
+	checkoutModel         models.CheckoutModel
+	stockModel            models.StockModel
+	reciepingredientModel models.RecipeIngredientsModel
 }
 
-func NewCheckoutController(checkoutModel models.CheckoutModel) *CheckoutController {
+func NewCheckoutController(checkoutModel models.CheckoutModel, stockModel models.StockModel, recipeIngredientModel models.RecipeIngredientsModel) *CheckoutController {
 	return &CheckoutController{
 		checkoutModel,
+		stockModel,
+		recipeIngredientModel,
 	}
 }
 
@@ -65,10 +69,22 @@ func (controller *CheckoutController) CreateCheckoutController(c echo.Context) e
 		}
 	}
 
+	for _, v := range recipeId {
+		if _, err := controller.reciepingredientModel.GetIdIngredientQtyIngredient(v); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"success": false,
+				"code":    500,
+				"message": "Internal Server Error",
+			})
+		}
+	}
+
+	// _, err := controller.stockModel.StockDecrease()
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Add Recipe To Cart",
+		"message": "Success Create Checkout",
 		"data":    output,
 	})
 }

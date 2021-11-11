@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 func setup() {
 	// -- Create Connection
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
@@ -63,7 +63,7 @@ func setup() {
 func TestValidGetAllCategoryController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
@@ -135,7 +135,7 @@ func TestValidGetAllCategoryController(t *testing.T) {
 func TestValidGetCategoryController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
@@ -206,7 +206,7 @@ func TestValidGetCategoryController(t *testing.T) {
 func TestValidInsertCategoryController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
@@ -279,7 +279,7 @@ func TestValidInsertCategoryController(t *testing.T) {
 func TestValidEditCategoryController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)
@@ -352,7 +352,7 @@ func TestValidEditCategoryController(t *testing.T) {
 func TestValidDeleteCategoryController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
-	db := util.MysqlDatabaseConnection(config)
+	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
 	categoryModel := models.NewCategoryModel(db)

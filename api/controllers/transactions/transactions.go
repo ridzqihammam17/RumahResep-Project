@@ -91,7 +91,7 @@ func (controller *TransactionController) CreateTransaction(c echo.Context) error
 		CustomerName:   user.Name,
 		Address:        user.Address,
 		ShippingMethod: transaction.ShippingMethod,
-		PaymentMethod:  transaction.PaymentMethod,
+		PaymentMethod:  "Belum Dipilih",
 		PaymentStatus:  "Belum Terbayar",
 		TotalPayment:   totalPayment,
 		CheckoutID:     uint(checkoutId),
