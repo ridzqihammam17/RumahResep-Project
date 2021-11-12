@@ -1,17 +1,2 @@
 mode: set
-rumah_resep/api/controllers/checkouts/checkouts.go:19.167,25.2 1 1
-rumah_resep/api/controllers/checkouts/checkouts.go:27.86,29.24 2 0
-rumah_resep/api/controllers/checkouts/checkouts.go:37.2,38.42 2 0
-rumah_resep/api/controllers/checkouts/checkouts.go:46.2,47.16 2 0
-rumah_resep/api/controllers/checkouts/checkouts.go:55.2,57.32 3 0
-rumah_resep/api/controllers/checkouts/checkouts.go:62.2,62.29 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:72.2,72.29 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:84.2,89.4 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:29.24,35.3 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:38.42,44.3 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:47.16,53.3 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:57.32,60.3 2 0
-rumah_resep/api/controllers/checkouts/checkouts.go:62.29,63.102 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:63.102,69.4 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:72.29,73.93 1 0
-rumah_resep/api/controllers/checkouts/checkouts.go:73.93,79.4 1 0
+

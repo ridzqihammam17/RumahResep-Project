@@ -2,6 +2,7 @@ package recipeingredients
 
 import (
 	"net/http"
+	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
 	"strconv"
 
@@ -23,8 +24,25 @@ func NewRecipeIngredientsController(recipeIngredientsModel models.RecipeIngredie
 }
 
 func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c echo.Context) error {
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized",
+		})
+	}
+
 	var recipeIngredients models.RecipeIngredients
-	if err := c.Bind(&recipeIngredients); err != nil {
+	c.Bind(&recipeIngredients)
+
+	categoryItem := models.RecipeIngredients{
+		RecipeId:      recipeIngredients.RecipeId,
+		IngredientId:  recipeIngredients.IngredientId,
+		QtyIngredient: recipeIngredients.QtyIngredient,
+	}
+
+	if categoryItem.RecipeId == 0 || categoryItem.IngredientId == 0 || categoryItem.QtyIngredient == 0 {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -32,14 +50,13 @@ func (controller *RecipeIngredientsController) AddIngredientsRecipeController(c 
 		})
 	}
 
-	categoryItem := models.RecipeIngredients{
-		RecipeId:      recipeIngredients.RecipeId,
-		IngredientId:  recipeIngredients.IngredientId,
-		QtyIngredient: recipeIngredients.QtyIngredient,
-	}
 	addIngredient, err := controller.recipeIngredientsModel.AddIngredientsRecipe(categoryItem)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Bad Request")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"succuess": false,
+			"code":     500,
+			"message":  "Internal Server Error",
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

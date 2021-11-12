@@ -31,9 +31,17 @@ func setup() {
 
 	// -- Clean DB Data
 	db.Migrator().DropTable(&models.User{})
+	db.Migrator().DropTable(&models.Recipe{})
+	db.Migrator().DropTable(&models.Ingredient{})
+	db.Migrator().DropTable(&models.RecipeIngredients{})
+	db.Migrator().DropTable(&models.Cart{})
 	db.Migrator().DropTable(&models.CartDetails{})
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Category{})
+	db.AutoMigrate(&models.Recipe{})
+	db.AutoMigrate(&models.Ingredient{})
+	db.AutoMigrate(&models.RecipeIngredients{})
+	db.AutoMigrate(&models.Cart{})
+	db.AutoMigrate(&models.CartDetails{})
 
 	// -- Dummy Data
 	var newUser models.User
@@ -49,27 +57,85 @@ func setup() {
 	if userModelErr != nil {
 		fmt.Println(userModelErr)
 	}
+
+	newUser.Name = "Budi"
+	newUser.Email = "budi@mail.com"
+	newUser.Password = "generate999"
+	newUser.Address = "jakarta"
+	newUser.Gender = "laki-laki"
+	newUser.Role = "admin"
+
+	_, userModelErr = userModel.Register(newUser)
+	if userModelErr != nil {
+		fmt.Println(userModelErr)
+	}
+
+	var newRecipe models.Recipe
+	newRecipe.Name = "Soto Ayam"
+
+	recipeModel := models.NewRecipeModel(db)
+	_, recipeModelErr := recipeModel.CreateRecipe(newRecipe)
+	if recipeModelErr != nil {
+		fmt.Println(recipeModelErr)
+	}
+
+	var newIngredient models.Ingredient
+	newIngredient.Name = "Bawang Merah"
+	newIngredient.Price = 500
+
+	ingredientModel := models.NewIngredientModel(db)
+	_, ingredientModelErr := ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	newIngredient.Name = "Daging Ayam"
+	newIngredient.Price = 4000
+
+	_, ingredientModelErr = ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	var newRecipeIngredient models.RecipeIngredients
+	newRecipeIngredient.RecipeId = 1
+	newRecipeIngredient.IngredientId = 1
+	newRecipeIngredient.QtyIngredient = 5
+
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	_, recipeIngredientErr := recipeIngredientModel.AddIngredientsRecipe(newRecipeIngredient)
+	if recipeIngredientErr != nil {
+		fmt.Println(recipeIngredientErr)
+	}
+
+	newRecipeIngredient.RecipeId = 1
+	newRecipeIngredient.IngredientId = 2
+	newRecipeIngredient.QtyIngredient = 1
+
+	_, recipeIngredientErr = recipeIngredientModel.AddIngredientsRecipe(newRecipeIngredient)
+	if recipeIngredientErr != nil {
+		fmt.Println(recipeIngredientErr)
+	}
+
+	var newCart models.Cart
+	newCart.UserID = 1
+	cartModel := models.NewCartModel(db)
+	_, cartErr := cartModel.CreateCart(newCart, int(newCart.UserID))
+	if cartErr != nil {
+		fmt.Println(cartErr)
+	}
+
 }
 
-func TestAddRecipeToCartController(t *testing.T) {
+func AuthValid(t *testing.T) string {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	userController := auth.NewAuthController(userModel)
 
-	cartDetailsModel := models.NewCartDetailsModel(db)
-	recipeModel := models.NewRecipeModel(db)
-	ingredientModel := models.NewIngredientModel(db)
-	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
-	cartModel := models.NewCartModel(db)
-	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
-
-	// Setting Route
 	e := echo.New()
 	e.POST("/api/login", userController.LoginUserController)
-	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
-	// Login Controller
 	reqBodyLogin, _ := json.Marshal(map[string]string{
 		"email":    "yudi@mail.com",
 		"password": "generate222",
@@ -95,6 +161,64 @@ func TestAddRecipeToCartController(t *testing.T) {
 	assert.Equal(t, "Success Login", loginResponse.Message)
 	assert.NotEqual(t, "", loginResponse.Token)
 
+	token := loginResponse.Token
+	return token
+}
+
+func AuthInvalid(t *testing.T) string {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	userController := auth.NewAuthController(userModel)
+
+	e := echo.New()
+	e.POST("/api/login", userController.LoginUserController)
+
+	reqBodyLogin, _ := json.Marshal(map[string]string{
+		"email":    "budi@mail.com",
+		"password": "generate999",
+	})
+
+	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	e.ServeHTTP(loginRes, loginReq)
+
+	type LoginResponse struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var loginResponse LoginResponse
+	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
+
+	assert.Equal(t, true, loginResponse.Success)
+	assert.Equal(t, 200, loginResponse.Code)
+	assert.Equal(t, "Success Login", loginResponse.Message)
+	assert.NotEqual(t, "", loginResponse.Token)
+
+	token := loginResponse.Token
+	return token
+}
+
+func TestAddRecipeToCartAuthInvalidController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthInvalid(t)
+	e := echo.New()
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
 	// Add To Cart Controller
 	reqBodyPost, _ := json.Marshal((map[string]int{
 		"recipe_id": 1,
@@ -102,7 +226,93 @@ func TestAddRecipeToCartController(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(echo.POST, "/api/cartdetails", bytes.NewReader(reqBodyPost))
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.NotEmpty(t, "Unauthorized", response.Message)
+}
+
+func TestAddRecipeToCartBadRequestController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"recipe_id": 0,
+		"quantity":  0,
+	}))
+
+	req := httptest.NewRequest(echo.POST, "/api/cartdetails", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestAddRecipeToCartAuthValidController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.POST("/api/cartdetails", cartDetailsController.AddRecipeToCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"recipe_id": 1,
+		"quantity":  1,
+	}))
+
+	req := httptest.NewRequest(echo.POST, "/api/cartdetails", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)
@@ -123,14 +333,12 @@ func TestAddRecipeToCartController(t *testing.T) {
 	assert.Equal(t, 1, response.Data.CartID)
 	assert.Equal(t, 1, response.Data.RecipeID)
 	assert.Equal(t, 1, response.Data.Quantity)
-	assert.Equal(t, 55000, response.Data.Price)
+	assert.Equal(t, 6500, response.Data.Price)
 }
 
-func TestGetAllRecipeByCartIdController(t *testing.T) {
+func TestGetAllRecipeByCartIdAuthInvalidController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
-	userModel := models.NewUserModel(db)
-	userController := auth.NewAuthController(userModel)
 
 	cartDetailsModel := models.NewCartDetailsModel(db)
 	recipeModel := models.NewRecipeModel(db)
@@ -140,39 +348,92 @@ func TestGetAllRecipeByCartIdController(t *testing.T) {
 	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
 
 	// Setting Route
+	token := AuthInvalid(t)
 	e := echo.New()
-	e.POST("/api/login", userController.LoginUserController)
 	e.GET("/api/cartdetails", cartDetailsController.GetAllRecipeByCartIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
-
-	// Login Controller
-	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "yudi@mail.com",
-		"password": "generate222",
-	})
-
-	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
-	loginReq.Header.Set("Content-Type", "application/json")
-	loginRes := httptest.NewRecorder()
-	e.ServeHTTP(loginRes, loginReq)
-
-	type LoginResponse struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Token   string `json:"token"`
-	}
-
-	var loginResponse LoginResponse
-	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
-
-	assert.Equal(t, true, loginResponse.Success)
-	assert.Equal(t, 200, loginResponse.Code)
-	assert.Equal(t, "Success Login", loginResponse.Message)
-	assert.NotEqual(t, "", loginResponse.Token)
 
 	// Get All Recipe By Cart Id Controller
 	req := httptest.NewRequest(echo.GET, "/api/cartdetails", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized", response.Message)
+}
+
+// func TestGetAllRecipeByCartIdMethodInvalidController(t *testing.T) {
+// 	config := config.GetConfig()
+// 	db := util.MysqlDatabaseConnTest(config)
+
+// 	cartDetailsModel := models.NewCartDetailsModel(db)
+// 	recipeModel := models.NewRecipeModel(db)
+// 	ingredientModel := models.NewIngredientModel(db)
+// 	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+// 	cartModel := models.NewCartModel(db)
+// 	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+// 	// Setting Route
+// 	token := AuthDifferentUser(t)
+// 	e := echo.New()
+// 	e.GET("/api/cartdetails", cartDetailsController.GetAllRecipeByCartIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+// 	// Get All Recipe By Cart Id Controller
+// 	req := httptest.NewRequest(echo.GET, "/api/cartdetails", nil)
+// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+// 	req.Header.Set("Content-Type", "application/json")
+// 	res := httptest.NewRecorder()
+// 	e.ServeHTTP(res, req)
+
+// 	type Response struct {
+// 		Success bool                 `json:"success"`
+// 		Code    int                  `json:"code"`
+// 		Message string               `json:"message"`
+// 		Data    []models.CartDetails `json:"data"`
+// 	}
+
+// 	var response Response
+// 	json.Unmarshal(res.Body.Bytes(), &response)
+
+// 	assert.Equal(t, true, response.Success)
+// 	assert.Equal(t, 200, response.Code)
+// 	assert.NotEmpty(t, response.Data)
+// 	assert.Equal(t, 1, response.Data[0].CartID)
+// 	assert.Equal(t, 1, response.Data[0].RecipeID)
+// 	assert.Equal(t, 1, response.Data[0].Quantity)
+// 	assert.Equal(t, 6500, response.Data[0].Price)
+// }
+
+func TestGetAllRecipeByCartIdController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.GET("/api/cartdetails", cartDetailsController.GetAllRecipeByCartIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Recipe By Cart Id Controller
+	req := httptest.NewRequest(echo.GET, "/api/cartdetails", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)
@@ -193,14 +454,12 @@ func TestGetAllRecipeByCartIdController(t *testing.T) {
 	assert.Equal(t, 1, response.Data[0].CartID)
 	assert.Equal(t, 1, response.Data[0].RecipeID)
 	assert.Equal(t, 1, response.Data[0].Quantity)
-	assert.Equal(t, 55000, response.Data[0].Price)
+	assert.Equal(t, 6500, response.Data[0].Price)
 }
 
-func TestUpdateRecipePortionController(t *testing.T) {
+func TestUpdateRecipePortionAuthInvalidController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
-	userModel := models.NewUserModel(db)
-	userController := auth.NewAuthController(userModel)
 
 	cartDetailsModel := models.NewCartDetailsModel(db)
 	recipeModel := models.NewRecipeModel(db)
@@ -211,34 +470,8 @@ func TestUpdateRecipePortionController(t *testing.T) {
 
 	// Setting Route
 	e := echo.New()
-	e.POST("/api/login", userController.LoginUserController)
+	token := AuthInvalid(t)
 	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, middleware.JWT([]byte(constants.SECRET_JWT)))
-
-	// Login Controller
-	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "yudi@mail.com",
-		"password": "generate222",
-	})
-
-	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
-	loginReq.Header.Set("Content-Type", "application/json")
-	loginRes := httptest.NewRecorder()
-	e.ServeHTTP(loginRes, loginReq)
-
-	type LoginResponse struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Token   string `json:"token"`
-	}
-
-	var loginResponse LoginResponse
-	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
-
-	assert.Equal(t, true, loginResponse.Success)
-	assert.Equal(t, 200, loginResponse.Code)
-	assert.Equal(t, "Success Login", loginResponse.Message)
-	assert.NotEqual(t, "", loginResponse.Token)
 
 	// Add To Cart Controller
 	reqBodyPost, _ := json.Marshal((map[string]int{
@@ -246,7 +479,132 @@ func TestUpdateRecipePortionController(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(echo.PUT, "/api/cartdetails/1", bytes.NewReader(reqBodyPost))
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized", response.Message)
+}
+
+func TestUpdateRecipePortionStrconvInvalidController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	e := echo.New()
+	token := AuthValid(t)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"quantity": 2,
+	}))
+
+	req := httptest.NewRequest(echo.PUT, "/api/cartdetails/satu", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestUpdateRecipePortionBadRequestController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	e := echo.New()
+	token := AuthValid(t)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"quantity": 0,
+	}))
+
+	req := httptest.NewRequest(echo.PUT, "/api/cartdetails/1", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.CartDetails `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestUpdateRecipePortionController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	e := echo.New()
+	token := AuthValid(t)
+	e.PUT("/api/cartdetails/:recipeId", cartDetailsController.UpdateRecipePortionController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Add To Cart Controller
+	reqBodyPost, _ := json.Marshal((map[string]int{
+		"quantity": 2,
+	}))
+
+	req := httptest.NewRequest(echo.PUT, "/api/cartdetails/1", bytes.NewReader(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)
@@ -267,13 +625,12 @@ func TestUpdateRecipePortionController(t *testing.T) {
 	assert.Equal(t, 1, response.Data.CartID)
 	assert.Equal(t, 1, response.Data.RecipeID)
 	assert.Equal(t, 2, response.Data.Quantity)
+	assert.Equal(t, 13000, response.Data.Price)
 }
 
-func TestDeleteRecipeFromCartController(t *testing.T) {
+func TestDeleteRecipeFromCartAuthInvalidController(t *testing.T) {
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
-	userModel := models.NewUserModel(db)
-	userController := auth.NewAuthController(userModel)
 
 	cartDetailsModel := models.NewCartDetailsModel(db)
 	recipeModel := models.NewRecipeModel(db)
@@ -283,39 +640,124 @@ func TestDeleteRecipeFromCartController(t *testing.T) {
 	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
 
 	// Setting Route
+	token := AuthInvalid(t)
 	e := echo.New()
-	e.POST("/api/login", userController.LoginUserController)
 	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
-
-	// Login Controller
-	reqBodyLogin, _ := json.Marshal(map[string]string{
-		"email":    "yudi@mail.com",
-		"password": "generate222",
-	})
-
-	loginReq := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyLogin))
-	loginReq.Header.Set("Content-Type", "application/json")
-	loginRes := httptest.NewRecorder()
-	e.ServeHTTP(loginRes, loginReq)
-
-	type LoginResponse struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Token   string `json:"token"`
-	}
-
-	var loginResponse LoginResponse
-	json.Unmarshal(loginRes.Body.Bytes(), &loginResponse)
-
-	assert.Equal(t, true, loginResponse.Success)
-	assert.Equal(t, 200, loginResponse.Code)
-	assert.Equal(t, "Success Login", loginResponse.Message)
-	assert.NotEqual(t, "", loginResponse.Token)
 
 	// Get All Recipe By Cart Id Controller
 	req := httptest.NewRequest(echo.DELETE, "/api/cartdetails/1", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", loginResponse.Token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized", response.Message)
+}
+
+func TestDeleteRecipeFromCartMethodInvalidController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Recipe By Cart Id Controller
+	req := httptest.NewRequest(echo.DELETE, "/api/cartdetails/99", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 500, response.Code)
+	assert.Equal(t, "Internal Server Error", response.Message)
+}
+
+func TestDeleteRecipeFromCartStrconvInvalidController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Recipe By Cart Id Controller
+	req := httptest.NewRequest(echo.DELETE, "/api/cartdetails/satu", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestDeleteRecipeFromCartController(t *testing.T) {
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	cartDetailsModel := models.NewCartDetailsModel(db)
+	recipeModel := models.NewRecipeModel(db)
+	ingredientModel := models.NewIngredientModel(db)
+	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
+	cartModel := models.NewCartModel(db)
+	cartDetailsController := NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientModel, cartModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.DELETE("/api/cartdetails/:recipeId", cartDetailsController.DeleteRecipeFromCartController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Recipe By Cart Id Controller
+	req := httptest.NewRequest(echo.DELETE, "/api/cartdetails/1", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
 	e.ServeHTTP(res, req)

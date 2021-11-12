@@ -2,6 +2,7 @@ package recipescategories
 
 import (
 	"net/http"
+	"rumah_resep/api/middlewares"
 	"rumah_resep/models"
 	"strconv"
 	"strings"
@@ -27,21 +28,24 @@ func NewRecipesCategoriesController(
 }
 
 func (controller *RecipesCategoriesController) AddRecipeCategoriesController(c echo.Context) error {
-	var recipeCategories models.RecipeCategories
-	if err := c.Bind(&recipeCategories); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
-			"code":    400,
-			"message": "Bad Request",
+			"code":    401,
+			"message": "Unauthorized",
 		})
 	}
+
+	var recipeCategories models.RecipeCategories
+	c.Bind(&recipeCategories)
 
 	categoryItem := models.RecipeCategories{
 		RecipeId:   recipeCategories.RecipeId,
 		CategoryId: recipeCategories.CategoryId,
 	}
-	_, err := controller.recipesCategoriesModel.AddRecipeCategories(categoryItem)
-	if err != nil {
+
+	if categoryItem.RecipeId == 0 || categoryItem.CategoryId == 0 {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -49,8 +53,18 @@ func (controller *RecipesCategoriesController) AddRecipeCategoriesController(c e
 		})
 	}
 
+	output, err := controller.recipesCategoriesModel.AddRecipeCategories(categoryItem)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
+		"data":    output,
 		"code":    200,
 		"message": "Success Add Recipe Category",
 	})
@@ -61,15 +75,22 @@ func (controller *RecipesCategoriesController) GetRecipeByCategoryIdController(c
 	categoryId := strings.Split(c.Param("categoryId"), ",")
 	var categoryName []int
 	for _, v := range categoryId {
-		value, _ := strconv.Atoi(v)
+		value, err := strconv.Atoi(v)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"code":    400,
+				"message": "Bad Request",
+			})
+		}
 		categoryName = append(categoryName, value)
 	}
 	recipe, err := controller.recipesCategoriesModel.GetRecipeByCategoryId(categoryName)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
-			"code":    400,
-			"message": "Bad Request",
+			"code":    500,
+			"message": "Internal Server Error",
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
