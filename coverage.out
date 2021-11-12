@@ -1,27 +1,2 @@
 mode: set
-rumah_resep/api/controllers/stocks/stock.go:17.72,22.2 1 1
-rumah_resep/api/controllers/stocks/stock.go:24.86,28.22 2 1
-rumah_resep/api/controllers/stocks/stock.go:36.2,40.16 4 1
-rumah_resep/api/controllers/stocks/stock.go:48.2,53.25 2 1
-rumah_resep/api/controllers/stocks/stock.go:61.2,62.16 2 1
-rumah_resep/api/controllers/stocks/stock.go:70.2,75.4 1 1
-rumah_resep/api/controllers/stocks/stock.go:28.22,34.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:40.16,46.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:53.25,59.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:62.16,68.3 1 0
-rumah_resep/api/controllers/stocks/stock.go:79.80,81.22 2 1
-rumah_resep/api/controllers/stocks/stock.go:89.2,93.16 4 1
-rumah_resep/api/controllers/stocks/stock.go:101.2,106.25 2 1
-rumah_resep/api/controllers/stocks/stock.go:114.2,115.16 2 1
-rumah_resep/api/controllers/stocks/stock.go:123.2,128.4 1 1
-rumah_resep/api/controllers/stocks/stock.go:81.22,87.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:93.16,99.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:106.25,112.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:115.16,121.3 1 0
-rumah_resep/api/controllers/stocks/stock.go:131.83,133.77 2 1
-rumah_resep/api/controllers/stocks/stock.go:141.2,142.22 2 1
-rumah_resep/api/controllers/stocks/stock.go:150.2,151.16 2 1
-rumah_resep/api/controllers/stocks/stock.go:159.2,164.4 1 1
-rumah_resep/api/controllers/stocks/stock.go:133.77,139.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:142.22,148.3 1 1
-rumah_resep/api/controllers/stocks/stock.go:151.16,157.3 1 0
+

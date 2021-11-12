@@ -6,7 +6,7 @@ import (
 	"rumah_resep/api/controllers/carts"
 	"rumah_resep/api/controllers/categories"
 	"rumah_resep/api/controllers/checkouts"
-	"rumah_resep/api/controllers/ingredient"
+	"rumah_resep/api/controllers/ingredients"
 	"rumah_resep/api/controllers/midtrans"
 	recipeingredients "rumah_resep/api/controllers/recipeIngredients"
 	"rumah_resep/api/controllers/recipes"
@@ -27,7 +27,7 @@ func Route(
 	recipeController *recipes.RecipeController,
 	categoryController *categories.CategoryController,
 	recipesCategroriesController *recipescategories.RecipesCategoriesController,
-	ingredientController *ingredient.IngredientController,
+	ingredientController *ingredients.IngredientController,
 	recipeIngredientsController *recipeingredients.RecipeIngredientsController,
 	cartDetailsController *cartdetails.CartDetailsController,
 	checkoutController *checkouts.CheckoutController,

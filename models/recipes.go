@@ -12,8 +12,6 @@ type Recipe struct {
 	RecipeCategories []RecipeCategories
 	// One to Many with Recipe Ingredient
 	RecipeIngredients []RecipeIngredients
-
-	// Category int `json:"category" form:"category"`
 }
 
 type GormRecipeModel struct {
@@ -30,7 +28,6 @@ type RecipeModel interface {
 	GetRecipeById(recipeId int) (Recipe, error)
 	UpdateRecipe(recipe Recipe, recipeId int) (Recipe, error)
 	DeleteRecipe(recipeId int) (Recipe, error)
-	// GetRecipeByCategoryId(categoryId []int) ([]Recipe, error)
 }
 
 func (m *GormRecipeModel) CreateRecipe(recipe Recipe) (Recipe, error) {
@@ -50,7 +47,7 @@ func (m *GormRecipeModel) GetAllRecipe() ([]Recipe, error) {
 
 func (m *GormRecipeModel) GetRecipeById(recipeId int) (Recipe, error) {
 	var recipe Recipe
-	if err := m.db.Find(&recipe, recipeId).Error; err != nil {
+	if err := m.db.First(&recipe, recipeId).Error; err != nil {
 		return recipe, err
 	}
 	return recipe, nil
@@ -58,12 +55,11 @@ func (m *GormRecipeModel) GetRecipeById(recipeId int) (Recipe, error) {
 
 func (m *GormRecipeModel) UpdateRecipe(recipe Recipe, recipeId int) (Recipe, error) {
 	var newRecipe Recipe
-	if err := m.db.Find(&newRecipe, recipeId).Error; err != nil {
+	if err := m.db.First(&newRecipe, recipeId).Error; err != nil {
 		return recipe, err
 	}
 
 	newRecipe.Name = recipe.Name
-	// newRecipe.Category = recipe.Category
 
 	if err := m.db.Save(&newRecipe).Error; err != nil {
 		return newRecipe, err
@@ -73,7 +69,7 @@ func (m *GormRecipeModel) UpdateRecipe(recipe Recipe, recipeId int) (Recipe, err
 
 func (m *GormRecipeModel) DeleteRecipe(recipeId int) (Recipe, error) {
 	var recipe Recipe
-	if err := m.db.Find(&recipe, recipeId).Error; err != nil {
+	if err := m.db.First(&recipe, recipeId).Error; err != nil {
 		return recipe, err
 	}
 
@@ -82,16 +78,3 @@ func (m *GormRecipeModel) DeleteRecipe(recipeId int) (Recipe, error) {
 	}
 	return recipe, nil
 }
-
-// func (m *GormRecipeModel) GetRecipeByCategoryId(categoryId []int) ([]Recipe, error) {
-// 	var recipe []Recipe
-
-// 	if err := m.db.Find(&recipe, "category in ?", categoryId).Error; err != nil {
-// 		return recipe, err
-// 	}
-// 	if len(recipe) == 0 {
-
-// 		return nil, errors.New("Data Not Found")
-// 	}
-// 	return recipe, nil
-// }

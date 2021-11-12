@@ -50,7 +50,7 @@ func (m *GormCategoryModel) Insert(category Category) (Category, error) {
 
 func (m *GormCategoryModel) Edit(newCategory Category, categoryId int) (Category, error) {
 	var category Category
-	if err := m.db.Find(&category, "id=?", categoryId).Error; err != nil {
+	if err := m.db.First(&category, categoryId).Error; err != nil {
 		return category, err
 	}
 
@@ -64,7 +64,7 @@ func (m *GormCategoryModel) Edit(newCategory Category, categoryId int) (Category
 
 func (m *GormCategoryModel) Delete(categoryId int) (Category, error) {
 	var category Category
-	if err := m.db.Find(&category, "id=?", categoryId).Error; err != nil {
+	if err := m.db.First(&category, categoryId).Error; err != nil {
 		return category, err
 	}
 	if err := m.db.Delete(&category).Error; err != nil {
