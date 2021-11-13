@@ -29,8 +29,17 @@ func setup() {
 	db := util.MysqlDatabaseConnTest(config)
 
 	// -- Clean DB Data
-	db.Migrator().DropTable(&models.User{})
+	db.Migrator().DropTable(&models.Transaction{})
+	db.Migrator().DropTable(&models.CartDetails{})
+	db.Migrator().DropTable(&models.Cart{})
+	db.Migrator().DropTable(&models.Checkout{})
+	db.Migrator().DropTable(&models.Stock{})
+	db.Migrator().DropTable(&models.RecipeIngredients{})
+	db.Migrator().DropTable(&models.RecipeCategories{})
 	db.Migrator().DropTable(&models.Ingredient{})
+	db.Migrator().DropTable(&models.Category{})
+	db.Migrator().DropTable(&models.Recipe{})
+	db.Migrator().DropTable(&models.User{})
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Ingredient{})
 

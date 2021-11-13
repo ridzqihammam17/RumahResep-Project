@@ -9,7 +9,6 @@ import (
 )
 
 type MidtransController struct {
-	// midtransModel models.MidtransMo
 	transactionModel models.TransactionModel
 }
 
@@ -24,32 +23,36 @@ func (controller *MidtransController) RequestPayment(c echo.Context) error {
 
 	totalPayment, _ := controller.transactionModel.GetTotalPayment(ids)
 
-	redirectURL, err := models.RequestPayment(ids, totalPayment)
+	data, err := models.RequestPayment(ids, totalPayment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error Bosqu")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
 		"message": "Success Request Payment",
-		"data":    redirectURL,
+		"data":    data,
 	})
 }
 
 func (controller *MidtransController) StatusPayment(c echo.Context) error {
 	ids := c.Param("id")
-	// idStr, err := strconv.Atoi(id)
-	// if err != nil {
-	// 	return echo.NewHTTPError(http.StatusBadRequest, "ID Invalid")
-	// }
-	redirectURL, err := models.StatusPayment(ids)
+	data, err := models.StatusPayment(ids)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error Bosqu")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
 		"message": "Success Get Status Payment",
-		"data":    redirectURL,
+		"data":    data,
 	})
 }
