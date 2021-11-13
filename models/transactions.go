@@ -60,7 +60,7 @@ func (m *GormTransactionModel) GetCheckoutId(cartId int) (int, error) {
 func (m *GormTransactionModel) GetUserData(userId int) (Transaction, error) {
 	var user User
 	var transaction Transaction
-	if err := m.db.Find(&user, userId).Error; err != nil {
+	if err := m.db.First(&user, userId).Error; err != nil {
 		return transaction, err
 	}
 	return transaction, nil
@@ -78,7 +78,7 @@ func (m *GormTransactionModel) CountTotalPayment(cartId, checkoutId int) (int, e
 func (m *GormTransactionModel) GetTotalPayment(transactionId int) (int, error) {
 	var transaction Transaction
 	// var totalPayment int
-	if err := m.db.Find(&transaction, transactionId).Error; err != nil {
+	if err := m.db.First(&transaction, transactionId).Error; err != nil {
 		return transaction.TotalPayment, err
 	}
 	return transaction.TotalPayment, nil
