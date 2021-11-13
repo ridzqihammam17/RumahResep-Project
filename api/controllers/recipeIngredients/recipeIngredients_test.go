@@ -29,9 +29,20 @@ func setup() {
 	db := util.MysqlDatabaseConnTest(config)
 
 	// cleaning data before testing
-	db.Migrator().DropTable(&models.User{})
+	db.Migrator().DropTable(&models.Transaction{})
+	db.Migrator().DropTable(&models.CartDetails{})
+	db.Migrator().DropTable(&models.Cart{})
+	db.Migrator().DropTable(&models.Checkout{})
+	db.Migrator().DropTable(&models.Stock{})
 	db.Migrator().DropTable(&models.RecipeIngredients{})
+	db.Migrator().DropTable(&models.RecipeCategories{})
+	db.Migrator().DropTable(&models.Ingredient{})
+	db.Migrator().DropTable(&models.Category{})
+	db.Migrator().DropTable(&models.Recipe{})
+	db.Migrator().DropTable(&models.User{})
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Recipe{})
+	db.AutoMigrate(&models.Ingredient{})
 	db.AutoMigrate(&models.RecipeIngredients{})
 
 	// -- Dummy Data
@@ -62,11 +73,39 @@ func setup() {
 	}
 
 	// dummy data for recipe
+	var newRecipe models.Recipe
+	newRecipe.Name = "Soto Ayam"
+
+	recipeModel := models.NewRecipeModel(db)
+	_, recipeModelErr := recipeModel.CreateRecipe(newRecipe)
+	if recipeModelErr != nil {
+		fmt.Println(recipeModelErr)
+	}
+
+	var newIngredient models.Ingredient
+	newIngredient.Name = "Bawang Merah"
+	newIngredient.Price = 500
+
+	ingredientModel := models.NewIngredientModel(db)
+	_, ingredientModelErr := ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	var newIngredient1 models.Ingredient
+	newIngredient1.Name = "Bawang Merah"
+	newIngredient1.Price = 500
+
+	ingredientModel1 := models.NewIngredientModel(db)
+	_, ingredientModelErr1 := ingredientModel1.CreateIngredient(newIngredient1)
+	if ingredientModelErr1 != nil {
+		fmt.Println(ingredientModelErr1)
+	}
+
 	var newRecipeIngredient models.RecipeIngredients
 	newRecipeIngredient.RecipeId = 1
 	newRecipeIngredient.IngredientId = 1
 	newRecipeIngredient.QtyIngredient = 10
-	// newRecipe.Ingredients = "1"
 
 	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
 	_, err := recipeIngredientModel.AddIngredientsRecipe(newRecipeIngredient)

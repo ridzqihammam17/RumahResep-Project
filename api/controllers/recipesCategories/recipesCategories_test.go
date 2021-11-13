@@ -29,9 +29,20 @@ func setup() {
 	db := util.MysqlDatabaseConnTest(config)
 
 	// cleaning data before testing
-	db.Migrator().DropTable(&models.User{})
+	db.Migrator().DropTable(&models.Transaction{})
+	db.Migrator().DropTable(&models.CartDetails{})
+	db.Migrator().DropTable(&models.Cart{})
+	db.Migrator().DropTable(&models.Checkout{})
+	db.Migrator().DropTable(&models.Stock{})
+	db.Migrator().DropTable(&models.RecipeIngredients{})
 	db.Migrator().DropTable(&models.RecipeCategories{})
+	db.Migrator().DropTable(&models.Ingredient{})
+	db.Migrator().DropTable(&models.Category{})
+	db.Migrator().DropTable(&models.Recipe{})
+	db.Migrator().DropTable(&models.User{})
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Recipe{})
+	db.AutoMigrate(&models.Category{})
 	db.AutoMigrate(&models.RecipeCategories{})
 
 	// -- Dummy Data
@@ -62,6 +73,24 @@ func setup() {
 	}
 
 	// dummy data for recipe
+	var newRecipe models.Recipe
+	newRecipe.Name = "Rujak Cingur"
+
+	recipeModel := models.NewRecipeModel(db)
+	_, recipeModelErr := recipeModel.CreateRecipe(newRecipe)
+	if recipeModelErr != nil {
+		fmt.Println(recipeModelErr)
+	}
+
+	var newCategory models.Category
+	newCategory.Name = "Makanan"
+
+	categoryModel := models.NewCategoryModel(db)
+	_, categoryModelErr := categoryModel.Insert(newCategory)
+	if categoryModelErr != nil {
+		fmt.Println(categoryModelErr)
+	}
+
 	var newRecipeCategory models.RecipeCategories
 	newRecipeCategory.RecipeId = 1
 	newRecipeCategory.CategoryId = 1
