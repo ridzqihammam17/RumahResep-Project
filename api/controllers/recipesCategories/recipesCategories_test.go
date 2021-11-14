@@ -82,6 +82,15 @@ func setup() {
 		fmt.Println(recipeModelErr)
 	}
 
+	var newRecipe1 models.Recipe
+	newRecipe1.Name = "Rujak Cingur"
+
+	recipeModel1 := models.NewRecipeModel(db)
+	_, recipeModel1Err := recipeModel1.CreateRecipe(newRecipe1)
+	if recipeModel1Err != nil {
+		fmt.Println(recipeModel1Err)
+	}
+
 	var newCategory models.Category
 	newCategory.Name = "Makanan"
 

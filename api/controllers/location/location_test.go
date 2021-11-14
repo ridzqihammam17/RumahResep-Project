@@ -7,7 +7,6 @@ import (
 
 	"rumah_resep/config"
 
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,6 +63,24 @@ func TestCalculateDistance(t *testing.T) {
 	}
 	assert.Equal(t, tt.expected, result)
 }
+
+func TestInvalidCalculateDistance(t *testing.T) {
+	config.InitConfig()
+	tt := struct {
+		start, end []string
+		expected   int
+	}{
+		[]string{"invalid", "-73.9976592"},
+		[]string{"40.6655101", "-73.89188969999998"},
+		10353,
+	}
+	result, err := calculateDistance(tt.start, tt.end)
+	if err != nil {
+		t.Errorf("calculateDistance error: %v", err)
+	}
+	assert.NotEqual(t, tt.expected, result)
+}
+
 func TestFormatAddress(t *testing.T) {
 	var address1 string
 	var address2 string

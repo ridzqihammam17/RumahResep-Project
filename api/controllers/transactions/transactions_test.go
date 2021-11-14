@@ -51,6 +51,7 @@ func setup() {
 	newUser.Address = "Bekasi"
 	newUser.Email = "rudi@test.com"
 	newUser.Password = "rudi99"
+	newUser.Gender = "laki"
 	newUser.Role = "customer"
 
 	var newUser1 models.User
@@ -60,6 +61,14 @@ func setup() {
 	newUser1.Address = "jl. barat laut no 1"
 	newUser1.Gender = "laki"
 	newUser1.Role = "admin"
+
+	var newUser2 models.User
+	newUser2.Name = "Rudi2"
+	newUser2.Address = "Bekasi2"
+	newUser2.Email = "rudi2@test.com"
+	newUser2.Password = "rudi99"
+	newUser2.Gender = "laki"
+	newUser2.Role = "customer"
 
 	userModel := models.NewUserModel(db)
 	_, userModelErr := userModel.Register(newUser)
@@ -71,6 +80,12 @@ func setup() {
 	_, userModelErr1 := userModel1.Register(newUser1)
 	if userModelErr1 != nil {
 		fmt.Println(userModelErr1)
+	}
+
+	userModel2 := models.NewUserModel(db)
+	_, userModelErr2 := userModel2.Register(newUser2)
+	if userModelErr2 != nil {
+		fmt.Println(userModelErr2)
 	}
 	// ------ End User ------
 
@@ -302,6 +317,76 @@ func TestInvalidCreateTransactionNotCustomer(t *testing.T) {
 	assert.Equal(t, false, response.Success)
 	assert.Equal(t, 401, response.Code)
 	assert.Equal(t, "Unauthorized Error", response.Message)
+}
+
+func TestInvalidCreateTransactionNoCartId(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	transactionModel := models.NewTransactionModel(db)
+	cartModel := models.NewCartModel(db)
+	transactionController := NewTransactionController(transactionModel, cartModel, userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.POST("/api/transactions", transactionController.CreateTransaction, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "rudi2@test.com",
+		"password": "rudi99",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	reqBodyPost, _ := json.Marshal(map[string]interface{}{})
+
+	req := httptest.NewRequest(echo.POST, "/api/transactions", bytes.NewBuffer(reqBodyPost))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 500, response.Code)
+	assert.Equal(t, "Internal Server Error", response.Message)
 }
 
 func TestInvalidCreateTransactionNoShippingMethod(t *testing.T) {

@@ -81,7 +81,7 @@ func (m *GormUserModel) Login(email, password string) (User, error) {
 
 func (m *GormUserModel) GetUserData(userId int) (User, error) {
 	var user User
-	if err := m.db.Find(&user, userId).Error; err != nil {
+	if err := m.db.First(&user, userId).Error; err != nil {
 		return user, err
 	}
 	return user, nil
