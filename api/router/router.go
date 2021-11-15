@@ -83,7 +83,6 @@ func Route(
 	// Stock
 	// ------------------------------------------------------------------
 	e.POST("/api/stocks/:ingredientId", stockController.CreateStockUpdateController, jwtMiddleware)
-	e.PUT("/api/stocks/:ingredientId", stockController.UpdateStockController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
 	// Restock
@@ -117,7 +116,8 @@ func Route(
 	// ------------------------------------------------------------------
 	// Transactions
 	// ------------------------------------------------------------------
-	e.GET("/api/transactions", transactionController.GetAllTransaction, jwtMiddleware)
+	e.GET("/api/transactions", transactionController.GetAllTransactionAdmin, jwtMiddleware)
+	e.GET("/api/transactions/list", transactionController.GetAllTransactionCustomer, jwtMiddleware)
 	e.POST("/api/transactions", transactionController.CreateTransaction, jwtMiddleware)
 
 	// ------------------------------------------------------------------
