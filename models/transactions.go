@@ -34,6 +34,7 @@ type TransactionModel interface {
 	Get(transactionId int) (Transaction, error)
 	Add(Transaction) (Transaction, error)
 	GetTotalPayment(transactionId int) (int, error)
+	UpdatePaymentMethodAndStatus(paymentMethod, paymentStatus string, transactionId int) (Transaction, error)
 	// ChooseShippingPaymentMethod(checkoutId int, transaction Transaction) (Transaction, error)
 }
 
@@ -103,4 +104,12 @@ func (m *GormTransactionModel) Get(transactionId int) (Transaction, error) {
 
 func (m *GormTransactionModel) Add(transaction Transaction) (Transaction, error) {
 	return transaction, nil
+}
+
+func (m *GormTransactionModel) UpdatePaymentMethodAndStatus(paymentMethod, paymentStatus string, transactionId int) (Transaction, error) {
+	var newTransaction Transaction
+	if err := m.db.Raw("UPDATE transactions SET payment_method = ?, payment_status = ? WHERE id = ?", paymentMethod, paymentStatus, transactionId).Scan(&newTransaction).Error; err != nil {
+		return newTransaction, err
+	}
+	return newTransaction, nil
 }
