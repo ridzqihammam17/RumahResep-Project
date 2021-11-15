@@ -41,6 +41,34 @@ func NewTransactionController(transactionModel models.TransactionModel, cartMode
 	}
 }
 
+func (controller *TransactionController) GetAllTransaction(c echo.Context) error {
+	//check role customer or not
+	userId, role := middlewares.ExtractTokenUser(c)
+	if role != "customer" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized Error",
+		})
+	}
+
+	data, err := controller.transactionModel.GetAllTransaction(int(userId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    500,
+			"message": "Internal Server Error",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Get All Transaction",
+		"data":    data,
+	})
+}
+
 func (controller *TransactionController) CreateTransaction(c echo.Context) error {
 	//check role customer or not
 	userId, role := middlewares.ExtractTokenUser(c)

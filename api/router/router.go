@@ -117,6 +117,7 @@ func Route(
 	// ------------------------------------------------------------------
 	// Transactions
 	// ------------------------------------------------------------------
+	e.GET("/api/transactions", transactionController.GetAllTransaction, jwtMiddleware)
 	e.POST("/api/transactions", transactionController.CreateTransaction, jwtMiddleware)
 
 	// ------------------------------------------------------------------
