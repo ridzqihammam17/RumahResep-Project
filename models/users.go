@@ -11,6 +11,7 @@ type User struct {
 	gorm.Model
 	Name      string  `json:"name" form:"name"`
 	Address   string  `json:"address" form:"address"`
+	City      string  `json:"city" form:"city"`
 	Latitude  float64 `json:"latitude" form:"latitude"`
 	Longitude float64 `json:"longitude" form:"longitude"`
 	Email     string  `json:"email" form:"email"`
@@ -66,7 +67,7 @@ func (m *GormUserModel) Login(email, password string) (User, error) {
 		return user, err
 	}
 
-	user.Token, err = middlewares.CreateToken(int(user.ID), user.Role)
+	user.Token, err = middlewares.CreateToken(int(user.ID), user.Role, user.City)
 
 	if err != nil {
 		return user, err

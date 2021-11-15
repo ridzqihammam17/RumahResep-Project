@@ -24,6 +24,7 @@ type StockModel interface {
 	Restock(stock Stock, ingredientId int, useId int) (Stock, error)
 	StockDecrease(stock int, ingredientId int) (Stock, error)
 	GetRestockDate(daterange string) (Stock, error)
+	// GetSeller(userId int)
 }
 
 func (m *GormStockModel) CreateStockUpdate(stock Stock, ingredientId int) (Stock, error) {

@@ -9,11 +9,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func CreateToken(userId int, role string) (string, error) {
+func CreateToken(userId int, role, city string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["userId"] = int(userId)
 	claims["role"] = role
+	claims["city"] = city
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(constants.SECRET_JWT))
@@ -46,4 +47,15 @@ func ExtractTokenUser(c echo.Context) (uint, string) {
 		return userId, role
 	}
 	return 0, ""
+}
+
+func EctractCity(c echo.Context) string {
+
+	token := c.Get("user").(*jwt.Token)
+	if token.Valid {
+		claims := token.Claims.(jwt.MapClaims)
+		city := claims["city"].(string)
+		return city
+	}
+	return ""
 }

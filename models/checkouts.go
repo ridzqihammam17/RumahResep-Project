@@ -21,6 +21,7 @@ func NewCheckoutModel(db *gorm.DB) *GormCheckoutModel {
 type CheckoutModel interface {
 	CreateCheckout(checkout Checkout) (Checkout, error)
 	UpdateCheckoutIdOnCartDetails(recipeId, checkoutId int) (CartDetails, error)
+	// GetSeller(sellerCity string, ingredientId int) (Stock, error)
 }
 
 func (m *GormCheckoutModel) CreateCheckout(checkout Checkout) (Checkout, error) {
@@ -45,3 +46,7 @@ func (m *GormCheckoutModel) UpdateCheckoutIdOnCartDetails(recipeId, checkoutId i
 	}
 	return newCartDetails, nil
 }
+
+// func (m *GormCheckoutModel) GetSeller(sellerCity string, recipeId int) (User, error) {
+// 	if err := m.db.Raw("SELECT s.stock FROM ")
+// }

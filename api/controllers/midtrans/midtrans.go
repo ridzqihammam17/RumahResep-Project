@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"rumah_resep/models"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +20,8 @@ func NewMidtransController(transactionModel models.TransactionModel) *MidtransCo
 }
 
 func (controller *MidtransController) RequestPayment(c echo.Context) error {
-	ids, _ := strconv.Atoi(c.Param("id"))
+	idSplit := strings.Split(c.Param("id"), "-")
+	ids, _ := strconv.Atoi(idSplit[1])
 
 	totalPayment, _ := controller.transactionModel.GetTotalPayment(ids)
 
