@@ -26,6 +26,7 @@ func NewTransactionModel(db *gorm.DB) *GormTransactionModel {
 }
 
 type TransactionModel interface {
+	GetAllTransaction(userId int) ([]Transaction, error)
 	CreateTransaction(Transaction) (Transaction, error)
 	GetCheckoutId(cartId int) (int, error)
 	GetUserData(userId int) (Transaction, error)
@@ -34,6 +35,14 @@ type TransactionModel interface {
 	Add(Transaction) (Transaction, error)
 	GetTotalPayment(transactionId int) (int, error)
 	// ChooseShippingPaymentMethod(checkoutId int, transaction Transaction) (Transaction, error)
+}
+
+func (m *GormTransactionModel) GetAllTransaction(userId int) ([]Transaction, error) {
+	var transaction []Transaction
+	if err := m.db.Where("user_id=?", userId).Find(&transaction).Error; err != nil {
+		return nil, err
+	}
+	return transaction, nil
 }
 
 func (m *GormTransactionModel) CreateTransaction(transactions Transaction) (Transaction, error) {
