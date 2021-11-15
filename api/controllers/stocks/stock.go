@@ -22,14 +22,13 @@ func NewStockController(stockModel models.StockModel) *StockController {
 }
 
 func (controller *StockController) CreateStockUpdateController(c echo.Context) error {
-
 	//check role seller or not
 	userId, role := middlewares.ExtractTokenUser(c)
 	if role != "seller" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
-			"message": "Unauthorized",
+			"message": "Unauthorized Error",
 		})
 	}
 
@@ -77,12 +76,13 @@ func (controller *StockController) CreateStockUpdateController(c echo.Context) e
 }
 
 func (controller *StockController) UpdateStockController(c echo.Context) error {
+	//check role seller or not
 	userId, role := middlewares.ExtractTokenUser(c)
 	if role != "seller" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
 			"code":    401,
-			"message": "Unauthorized",
+			"message": "Unauthorized Error",
 		})
 	}
 
@@ -129,6 +129,16 @@ func (controller *StockController) UpdateStockController(c echo.Context) error {
 }
 
 func (controller *StockController) GetRestockDateController(c echo.Context) error {
+	//check role seller or not
+	userId, role := middlewares.ExtractTokenUser(c)
+	if role != "seller" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized Error",
+		})
+	}
+
 	daterange := c.Param("range")
 	if daterange != "daily" && daterange != "weekly" && daterange != "monthly" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -138,16 +148,7 @@ func (controller *StockController) GetRestockDateController(c echo.Context) erro
 		})
 	}
 
-	_, role := middlewares.ExtractTokenUser(c)
-	if role != "seller" {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"success": false,
-			"code":    401,
-			"message": "Unauthorized",
-		})
-	}
-
-	stock, err := controller.stockModel.GetRestockDate(daterange)
+	stock, err := controller.stockModel.GetRestockDate(int(userId), daterange)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -160,6 +161,27 @@ func (controller *StockController) GetRestockDateController(c echo.Context) erro
 		"success": true,
 		"code":    200,
 		"message": "Success Get Restock Date",
+		"data":    stock,
+	})
+}
+
+func (controller *StockController) GetRestockAllController(c echo.Context) error {
+	//check role seller or not
+	userId, role := middlewares.ExtractTokenUser(c)
+	if role != "seller" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized Error",
+		})
+	}
+
+	stock, _ := controller.stockModel.GetRestockAll(int(userId))
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Get All Restock",
 		"data":    stock,
 	})
 }

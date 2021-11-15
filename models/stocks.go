@@ -23,7 +23,8 @@ type StockModel interface {
 	CreateStockUpdate(stock Stock, ingredientId int) (Stock, error)
 	Restock(stock Stock, ingredientId int, useId int) (Stock, error)
 	StockDecrease(stock int, ingredientId int) (Stock, error)
-	GetRestockDate(daterange string) (Stock, error)
+	GetRestockDate(userId int, daterange string) (Stock, error)
+	GetRestockAll(userId int) (Stock, error)
 }
 
 func (m *GormStockModel) CreateStockUpdate(stock Stock, ingredientId int) (Stock, error) {
@@ -51,24 +52,34 @@ func (m *GormStockModel) StockDecrease(stock int, ingredientId int) (Stock, erro
 	return newStock, nil
 }
 
-func (m *GormStockModel) GetRestockDate(daterange string) (Stock, error) {
+func (m *GormStockModel) GetRestockDate(userId int, daterange string) (Stock, error) {
 	var stock Stock
 
 	if daterange == "daily" {
-		if err := m.db.Raw("SELECT * FROM stocks WHERE created_at >= DATE_ADD(CURDATE(), INTERVAL -1 DAY)").Scan(&stock).Error; err != nil {
+		if err := m.db.Where("created_at >= ? AND user_id = ?", "DATE_ADD(CURDATE(), INTERVAL -1 DAY)", userId).Find(&stock).Error; err != nil {
 			return stock, err
 		}
 		return stock, nil
 	} else if daterange == "weekly" {
-		if err := m.db.Where("created_at >= ?", "DATE_ADD(CURDATE(), INTERVAL -7 DAY)").Find(&stock).Error; err != nil {
+		if err := m.db.Where("created_at >= ? AND user_id = ?", "DATE_ADD(CURDATE(), INTERVAL -7 DAY)", userId).Find(&stock).Error; err != nil {
 			return stock, err
 		}
 		return stock, nil
 	} else if daterange == "monthly" {
-		if err := m.db.Where("created_at >= ?", "DATE_ADD(CURDATE(), INTERVAL -30 DAY)").Find(&stock).Error; err != nil {
+		if err := m.db.Where("created_at >= ? AND user_id = ?", "DATE_ADD(CURDATE(), INTERVAL -30 DAY)", userId).Find(&stock).Error; err != nil {
 			return stock, err
 		}
 		return stock, nil
+	}
+
+	return stock, nil
+}
+
+func (m *GormStockModel) GetRestockAll(userId int) (Stock, error) {
+	var stock Stock
+
+	if err := m.db.Where("user_id=?", userId).Find(&stock).Error; err != nil {
+		return stock, err
 	}
 
 	return stock, nil

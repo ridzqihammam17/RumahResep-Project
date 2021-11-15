@@ -174,7 +174,7 @@ func TestCreateStockUpdateAuthInvalidController(t *testing.T) {
 
 	assert.Equal(t, false, response.Success)
 	assert.Equal(t, 401, res.Code)
-	assert.Equal(t, "Unauthorized", response.Message)
+	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
 func TestCreateStockUpdateBadRequestAController(t *testing.T) {
@@ -334,7 +334,7 @@ func TestUpdateStockAuthInvalidController(t *testing.T) {
 
 	assert.Equal(t, false, response.Success)
 	assert.Equal(t, 401, response.Code)
-	assert.Equal(t, "Unauthorized", response.Message)
+	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
 func TestUpdateStockBadRequestAController(t *testing.T) {
@@ -471,10 +471,10 @@ func TestGetRestockDateAuthInvalidController(t *testing.T) {
 	// Setting Route
 	token := AuthInvalid(t)
 	e := echo.New()
-	e.GET("/api/stocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/restocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// Get All Controller
-	req := httptest.NewRequest(echo.GET, "/api/stocks/daily", nil)
+	req := httptest.NewRequest(echo.GET, "/api/restocks/daily", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -491,7 +491,7 @@ func TestGetRestockDateAuthInvalidController(t *testing.T) {
 
 	assert.Equal(t, false, response.Success)
 	assert.Equal(t, 401, response.Code)
-	assert.Equal(t, "Unauthorized", response.Message)
+	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
 func TestGetRestockDateParamBadRequestController(t *testing.T) {
@@ -505,10 +505,10 @@ func TestGetRestockDateParamBadRequestController(t *testing.T) {
 	// Setting Route
 	token := AuthValid(t)
 	e := echo.New()
-	e.GET("/api/stocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/restocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// Get All Controller
-	req := httptest.NewRequest(echo.GET, "/api/stocks/yearly", nil)
+	req := httptest.NewRequest(echo.GET, "/api/restocks/yearly", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -539,10 +539,10 @@ func TestGetRestockDateController(t *testing.T) {
 	// Setting Route
 	token := AuthValid(t)
 	e := echo.New()
-	e.GET("/api/stocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/restocks/:range", stockController.GetRestockDateController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// Get All Controller
-	req := httptest.NewRequest(echo.GET, "/api/stocks/daily", nil)
+	req := httptest.NewRequest(echo.GET, "/api/restocks/daily", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -561,4 +561,73 @@ func TestGetRestockDateController(t *testing.T) {
 	assert.Equal(t, true, response.Success)
 	assert.Equal(t, 200, response.Code)
 	assert.Equal(t, "Success Get Restock Date", response.Message)
+}
+
+func TestGetAllRestockController(t *testing.T) {
+	// create database connection and create controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	stockModel := models.NewStockModel(db)
+	stockController := NewStockController(stockModel)
+
+	// Setting Route
+	token := AuthValid(t)
+	e := echo.New()
+	e.GET("/api/restocks", stockController.GetRestockAllController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Controller
+	req := httptest.NewRequest(echo.GET, "/api/restocks", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool           `json:"success"`
+		Code    int            `json:"code"`
+		Message string         `json:"message"`
+		Data    []models.Stock `json:"data"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, true, response.Success)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Get All Restock", response.Message)
+}
+
+func TestInvalidGetAllRestockControllerNotSeller(t *testing.T) {
+	// create database connection and create controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+
+	stockModel := models.NewStockModel(db)
+	stockController := NewStockController(stockModel)
+
+	// Setting Route
+	token := AuthInvalid(t)
+	e := echo.New()
+	e.GET("/api/restocks", stockController.GetRestockAllController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// Get All Controller
+	req := httptest.NewRequest(echo.GET, "/api/restocks", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized Error", response.Message)
 }
