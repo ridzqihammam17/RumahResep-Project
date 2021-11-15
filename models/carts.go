@@ -18,7 +18,7 @@ func NewCartModel(db *gorm.DB) *GormCartModel {
 
 type CartModel interface {
 	CreateCart(cart Cart, userId int) (Cart, error)
-	GetCartIdByUserId(cartId int) (int, error)
+	GetCartIdByUserId(userId int) (int, error)
 }
 
 func (m *GormCartModel) CreateCart(cart Cart, userId int) (Cart, error) {

@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,11 @@ import (
 type JSON map[string]interface{}
 
 func RequestPayment(OrderId int, amount int) (redirectURL string, err error) {
+
+	if OrderId <= 0 || amount <= 0 {
+		err := errors.New("negative or 0 number")
+		return "", err
+	}
 
 	url := "https://app.sandbox.midtrans.com/snap/v1/transactions"
 	method := "POST"

@@ -13,7 +13,7 @@ import (
 	cartControllers "rumah_resep/api/controllers/carts"
 	categoryControllers "rumah_resep/api/controllers/categories"
 	checkoutControllers "rumah_resep/api/controllers/checkouts"
-	ingredientControllers "rumah_resep/api/controllers/ingredient"
+	ingredientControllers "rumah_resep/api/controllers/ingredients"
 	midtransControllers "rumah_resep/api/controllers/midtrans"
 	recipeIngredientsControllers "rumah_resep/api/controllers/recipeIngredients"
 	recipeControllers "rumah_resep/api/controllers/recipes"
@@ -49,11 +49,11 @@ func main() {
 	//initiate controller
 	newCartController := cartControllers.NewCartController(cartModel)
 	newAuthController := authControllers.NewAuthController(userModel)
-	newRecipeController := recipeControllers.NewRecipeController(recipesCategoriesModel, recipeModel, categoryModel)
+	newRecipeController := recipeControllers.NewRecipeController(recipeModel)
 	newCategoryController := categoryControllers.NewCategoryController(categoryModel)
 	newRecipesCategoriesController := recipeCategoriesControllers.NewRecipesCategoriesController(recipesCategoriesModel, recipeModel, categoryModel)
 	// newStockController := stockControllers.NewStrockController(stockModel)
-	newIngredientController := ingredientControllers.NewIngredientController(ingredientModel, stockModel)
+	newIngredientController := ingredientControllers.NewIngredientController(ingredientModel)
 	newRecipeIngredientsController := recipeIngredientsControllers.NewRecipeIngredientsController(recipeIngredientsModel, recipeModel, ingredientModel)
 	newCartDetailsController := cartDetailsControllers.NewCartDetailsController(cartDetailsModel, recipeModel, ingredientModel, recipeIngredientsModel, cartModel)
 	newCheckoutController := checkoutControllers.NewCheckoutController(checkoutModel, stockModel, recipeIngredientsModel)

@@ -73,13 +73,7 @@ func (controller *CartDetailsController) AddRecipeToCartController(c echo.Contex
 
 	// Bind body request
 	var cartDetails models.CartDetails
-	if err := c.Bind(&cartDetails); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Success Bad Request",
-		})
-	}
+	c.Bind(&cartDetails)
 
 	// Get Total Price
 	var idQtyIngredient []models.RecipeIngredients
@@ -97,6 +91,14 @@ func (controller *CartDetailsController) AddRecipeToCartController(c echo.Contex
 		RecipeID: cartDetails.RecipeID,
 		Quantity: cartDetails.Quantity,
 		Price:    totalPrice * cartDetails.Quantity,
+	}
+
+	if newCartDetails.RecipeID == 0 || newCartDetails.Quantity == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	output, err := controller.cartDetailsModel.AddRecipeToCart(newCartDetails)
@@ -131,13 +133,7 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 	cartId, _ := controller.cartModel.GetCartIdByUserId(int(userId))
 
 	var cartDetails models.CartDetails
-	if err := c.Bind(&cartDetails); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Success Bad Request",
-		})
-	}
+	c.Bind(&cartDetails)
 
 	recipeId, err := strconv.Atoi(c.Param("recipeId"))
 	if err != nil {
@@ -165,6 +161,14 @@ func (controller *CartDetailsController) UpdateRecipePortionController(c echo.Co
 		RecipeID: recipeId,
 		Quantity: cartDetails.Quantity,
 		Price:    totalPrice * cartDetails.Quantity,
+	}
+
+	if newCartDetails.Quantity == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	output, err := controller.cartDetailsModel.UpdateRecipePortion(newCartDetails, recipeId)
@@ -195,14 +199,14 @@ func (controller *CartDetailsController) DeleteRecipeFromCartController(c echo.C
 		})
 	}
 
-	var cartDetails models.CartDetails
-	if err := c.Bind(&cartDetails); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Success Bad Request",
-		})
-	}
+	// var cartDetails models.CartDetails
+	// if err := c.Bind(&cartDetails); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+	// 		"success": false,
+	// 		"code":    400,
+	// 		"message": "Success Bad Request",
+	// 	})
+	// }
 
 	recipeId, err := strconv.Atoi(c.Param("recipeId"))
 	if err != nil {

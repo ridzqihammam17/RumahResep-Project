@@ -1,4 +1,4 @@
-package recipes
+package ingredients
 
 import (
 	"net/http"
@@ -13,74 +13,31 @@ import (
 // Start Request
 // ------------------------------------------------------------------
 
-type CreateRecipeRequest struct {
-	Name string `json:"name" form:"name"`
+type CreateIngredientRequest struct {
+	Name  string `json:"name" form:"name"`
+	Price int    `json:"price" form:"price"`
 }
 
-type UpdateRecipeRequest struct {
-	Name string `json:"name" form:"name"`
+type UpdateIngredientRequest struct {
+	Name  string `json:"name" form:"name"`
+	Price int    `json:"price" form:"price"`
 }
 
 // ------------------------------------------------------------------
 // End Request
 // ------------------------------------------------------------------
 
-type RecipeController struct {
-	recipeModel models.RecipeModel
+type IngredientController struct {
+	ingredientModel models.IngredientModel
 }
 
-func NewRecipeController(recipeModel models.RecipeModel) *RecipeController {
-	return &RecipeController{
-		recipeModel,
+func NewIngredientController(ingredientModel models.IngredientModel) *IngredientController {
+	return &IngredientController{
+		ingredientModel,
 	}
 }
 
-func (controller *RecipeController) GetAllRecipeController(c echo.Context) error {
-	data, err := controller.recipeModel.GetAllRecipe()
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"code":    200,
-		"message": "Success Get All Recipe",
-		"data":    data,
-	})
-}
-
-func (controller *RecipeController) GetRecipeByIdController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("recipeId"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
-
-	data, err := controller.recipeModel.GetRecipeById(id)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"code":    200,
-		"message": "Success Get Recipe",
-		"data":    data,
-	})
-}
-
-func (controller *RecipeController) CreateRecipeController(c echo.Context) error {
+func (controller *IngredientController) GetAllIngredientController(c echo.Context) error {
 	//check role admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
@@ -91,14 +48,8 @@ func (controller *RecipeController) CreateRecipeController(c echo.Context) error
 		})
 	}
 
-	var recipeRequest CreateRecipeRequest
-
-	c.Bind(&recipeRequest)
-
-	recipe := models.Recipe{
-		Name: recipeRequest.Name,
-	}
-	if recipe.Name == "" {
+	data, err := controller.ingredientModel.GetAllIngredient()
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -106,7 +57,79 @@ func (controller *RecipeController) CreateRecipeController(c echo.Context) error
 		})
 	}
 
-	data, err := controller.recipeModel.CreateRecipe(recipe)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Get All Ingredient",
+		"data":    data,
+	})
+}
+
+func (controller *IngredientController) GetIngredientByIdController(c echo.Context) error {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized Error",
+		})
+	}
+
+	id, err := strconv.Atoi(c.Param("ingredientId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
+	data, err := controller.ingredientModel.GetIngredientById(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"code":    200,
+		"message": "Success Get Ingredient",
+		"data":    data,
+	})
+}
+
+func (controller *IngredientController) CreateIngredientController(c echo.Context) error {
+	//check role admin or not
+	_, role := middlewares.ExtractTokenUser(c)
+	if role != "admin" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"code":    401,
+			"message": "Unauthorized Error",
+		})
+	}
+
+	var ingredientRequest CreateIngredientRequest
+
+	c.Bind(&ingredientRequest)
+
+	ingredient := models.Ingredient{
+		Name:  ingredientRequest.Name,
+		Price: ingredientRequest.Price,
+	}
+	if ingredient.Name == "" || ingredient.Price < 0 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
+
+	data, err := controller.ingredientModel.CreateIngredient(ingredient)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -118,12 +141,12 @@ func (controller *RecipeController) CreateRecipeController(c echo.Context) error
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Create Recipe",
+		"message": "Success Create Ingredient",
 		"data":    data,
 	})
 }
 
-func (controller *RecipeController) UpdateRecipeController(c echo.Context) error {
+func (controller *IngredientController) UpdateIngredientController(c echo.Context) error {
 	// check admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
@@ -134,7 +157,7 @@ func (controller *RecipeController) UpdateRecipeController(c echo.Context) error
 		})
 	}
 
-	id, err := strconv.Atoi(c.Param("recipeId"))
+	id, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -143,14 +166,15 @@ func (controller *RecipeController) UpdateRecipeController(c echo.Context) error
 		})
 	}
 
-	var recipeRequest UpdateRecipeRequest
+	var ingredientRequest UpdateIngredientRequest
 
-	c.Bind(&recipeRequest)
+	c.Bind(&ingredientRequest)
 
-	recipe := models.Recipe{
-		Name: recipeRequest.Name,
+	ingredient := models.Ingredient{
+		Name:  ingredientRequest.Name,
+		Price: ingredientRequest.Price,
 	}
-	if recipe.Name == "" {
+	if ingredient.Name == "" || ingredient.Price < 0 {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -158,7 +182,7 @@ func (controller *RecipeController) UpdateRecipeController(c echo.Context) error
 		})
 	}
 
-	data, err := controller.recipeModel.UpdateRecipe(recipe, id)
+	data, err := controller.ingredientModel.UpdateIngredient(ingredient, id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -166,16 +190,15 @@ func (controller *RecipeController) UpdateRecipeController(c echo.Context) error
 			"message": "Bad Request",
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Update Recipe",
+		"message": "Success Update Ingredient",
 		"data":    data,
 	})
 }
 
-func (controller *RecipeController) DeleteRecipeController(c echo.Context) error {
+func (controller *IngredientController) DeleteIngredientController(c echo.Context) error {
 	// check admin or not
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "admin" {
@@ -186,7 +209,7 @@ func (controller *RecipeController) DeleteRecipeController(c echo.Context) error
 		})
 	}
 
-	id, err := strconv.Atoi(c.Param("recipeId"))
+	id, err := strconv.Atoi(c.Param("ingredientId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -195,7 +218,7 @@ func (controller *RecipeController) DeleteRecipeController(c echo.Context) error
 		})
 	}
 
-	if _, err := controller.recipeModel.DeleteRecipe(id); err != nil {
+	if _, err := controller.ingredientModel.DeleteIngredient(id); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
@@ -206,6 +229,6 @@ func (controller *RecipeController) DeleteRecipeController(c echo.Context) error
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Delete Recipe",
+		"message": "Success Delete Ingredient",
 	})
 }

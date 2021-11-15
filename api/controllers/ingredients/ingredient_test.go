@@ -1,4 +1,4 @@
-package recipes
+package ingredients
 
 import (
 	"bytes"
@@ -41,7 +41,7 @@ func setup() {
 	db.Migrator().DropTable(&models.Recipe{})
 	db.Migrator().DropTable(&models.User{})
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Recipe{})
+	db.AutoMigrate(&models.Ingredient{})
 
 	// -- Dummy Data
 	var newUser models.User
@@ -60,8 +60,13 @@ func setup() {
 	newUser1.Gender = "laki"
 	newUser1.Role = "admin"
 
-	var newRecipe models.Recipe
-	newRecipe.Name = "Recipe A"
+	var newIngredient models.Ingredient
+	newIngredient.Name = "Daging ayam dada"
+	newIngredient.Price = 30000
+
+	var newIngredient1 models.Ingredient
+	newIngredient1.Name = "Santan Kelapa"
+	newIngredient1.Price = 3000
 
 	// -- Dummy Data with Model
 	userModel := models.NewUserModel(db)
@@ -76,32 +81,38 @@ func setup() {
 		fmt.Println(userModelErr1)
 	}
 
-	recipeModel := models.NewRecipeModel(db)
-	_, recipeModelErr := recipeModel.CreateRecipe(newRecipe)
-	if recipeModelErr != nil {
-		fmt.Println(recipeModelErr)
+	ingredientModel := models.NewIngredientModel(db)
+	_, ingredientModelErr := ingredientModel.CreateIngredient(newIngredient)
+	if ingredientModelErr != nil {
+		fmt.Println(ingredientModelErr)
+	}
+
+	ingredientModel1 := models.NewIngredientModel(db)
+	_, ingredientModel1Err := ingredientModel1.CreateIngredient(newIngredient1)
+	if ingredientModel1Err != nil {
+		fmt.Println(ingredientModel1Err)
 	}
 }
 
-func TestValidGetAllRecipeController(t *testing.T) {
+func TestValidGetAllIngredientController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.GET("/api/recipes", recipesController.GetAllRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/ingredients", ingredientController.GetAllIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
 	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
-		"email":    "customer@test.com",
-		"password": "passCust",
+		"email":    "admin@test.com",
+		"password": "passAdmin",
 	})
 
 	// -- Setting Controller
@@ -129,7 +140,7 @@ func TestValidGetAllRecipeController(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.GET, "/api/recipes", nil)
+	req := httptest.NewRequest(echo.GET, "/api/ingredients", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -137,82 +148,10 @@ func TestValidGetAllRecipeController(t *testing.T) {
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
-		Success bool            `json:"success"`
-		Code    int             `json:"code"`
-		Message string          `json:"message"`
-		Data    []models.Recipe `json:"data"`
-	}
-
-	var response Response
-
-	json.Unmarshal(res.Body.Bytes(), &response)
-
-	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, res.Code)
-	assert.Equal(t, "Success Get All Recipe", response.Message)
-	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, 1, len(response.Data))
-	assert.Equal(t, "Recipe A", response.Data[0].Name)
-}
-
-func TestValidGetRecipeByIdController(t *testing.T) {
-	// -- Create Connection and Controller
-	config := config.GetConfig()
-	db := util.MysqlDatabaseConnTest(config)
-	userModel := models.NewUserModel(db)
-	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
-
-	// -- Declare Route
-	e := echo.New()
-	e.POST("/api/login", authController.LoginUserController)
-	e.GET("/api/recipes/:recipeId", recipesController.GetRecipeByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
-
-	// ------ Start Login ------
-	// -- Input
-	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
-		"email":    "customer@test.com",
-		"password": "passCust",
-	})
-
-	// -- Setting Controller
-	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
-	reqLogin.Header.Set("Content-Type", "application/json")
-	resLogin := httptest.NewRecorder()
-	e.ServeHTTP(resLogin, reqLogin)
-
-	// -- Declare Response and Convert to JSON
-	type ResponseLogin struct {
-		Success bool   `json:"success"`
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Token   string `json:"token"`
-	}
-
-	var responseLogin ResponseLogin
-
-	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
-
-	assert.Equal(t, true, responseLogin.Success)
-	assert.Equal(t, 200, resLogin.Code)
-	assert.Equal(t, "Success Login", responseLogin.Message)
-	assert.NotEqual(t, "", responseLogin.Token)
-	// ------ End Login ------
-
-	// -- Setting Controller
-	req := httptest.NewRequest(echo.GET, "/api/recipes/1", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
-	req.Header.Set("Content-Type", "application/json")
-	res := httptest.NewRecorder()
-	e.ServeHTTP(res, req)
-
-	// -- Declare Response and Convert to JSON
-	type Response struct {
-		Success bool          `json:"success"`
-		Code    int           `json:"code"`
-		Message string        `json:"message"`
-		Data    models.Recipe `json:"data"`
+		Success bool                `json:"success"`
+		Code    int                 `json:"code"`
+		Message string              `json:"message"`
+		Data    []models.Ingredient `json:"data"`
 	}
 
 	var response Response
@@ -221,24 +160,30 @@ func TestValidGetRecipeByIdController(t *testing.T) {
 
 	assert.Equal(t, true, response.Success)
 	assert.Equal(t, 200, response.Code)
-	assert.Equal(t, "Success Get Recipe", response.Message)
+	assert.Equal(t, "Success Get All Ingredient", response.Message)
 	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, "Recipe A", response.Data.Name)
+	assert.Equal(t, 2, len(response.Data))
+	assert.Equal(t, uint(1), response.Data[0].ID)
+	assert.Equal(t, "Daging ayam dada", response.Data[0].Name)
+	assert.Equal(t, 30000, response.Data[0].Price)
+	assert.Equal(t, uint(2), response.Data[1].ID)
+	assert.Equal(t, "Santan Kelapa", response.Data[1].Name)
+	assert.Equal(t, 3000, response.Data[1].Price)
 }
 
-func TestInvalidGetRecipeByIdControllerNoId(t *testing.T) {
+func TestInvalidGetAllIngredientControllerNotAdmin(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.GET("/api/recipes/:recipeId", recipesController.GetRecipeByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/ingredients", ingredientController.GetAllIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -272,7 +217,7 @@ func TestInvalidGetRecipeByIdControllerNoId(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.GET, "/api/recipes/id", nil)
+	req := httptest.NewRequest(echo.GET, "/api/ingredients", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -290,23 +235,96 @@ func TestInvalidGetRecipeByIdControllerNoId(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, response.Code)
-	assert.Equal(t, "Bad Request", response.Message)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
-func TestInvalidGetRecipeByIdControllerFalseId(t *testing.T) {
+func TestValidGetIngredientByIdController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.GET("/api/recipes/:recipeId", recipesController.GetRecipeByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/ingredients/1", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool              `json:"success"`
+		Code    int               `json:"code"`
+		Message string            `json:"message"`
+		Data    models.Ingredient `json:"data"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, true, response.Success)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Get Ingredient", response.Message)
+	assert.NotEmpty(t, response.Data)
+	assert.Equal(t, uint(1), response.Data.ID)
+	assert.Equal(t, "Daging ayam dada", response.Data.Name)
+	assert.Equal(t, 30000, response.Data.Price)
+}
+
+func TestInvalidGetIngredientByIdControllerNotAdmin(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -340,7 +358,75 @@ func TestInvalidGetRecipeByIdControllerFalseId(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.GET, "/api/recipes/100", nil)
+	req := httptest.NewRequest(echo.GET, "/api/ingredients/1", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized Error", response.Message)
+}
+
+func TestInvalidGetIngredientByIdControllerNoId(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/ingredients/id", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -362,19 +448,87 @@ func TestInvalidGetRecipeByIdControllerFalseId(t *testing.T) {
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestValidCreateRecipeController(t *testing.T) {
+func TestInvalidGetIngredientByIdControllerFalseId(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.POST("/api/recipes", recipesController.CreateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.GET("/api/ingredients/:ingredientId", ingredientController.GetIngredientByIdController, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "admin@test.com",
+		"password": "passAdmin",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/ingredients/200", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	// -- Declare Response and Convert to JSON
+	type Response struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 400, response.Code)
+	assert.Equal(t, "Bad Request", response.Message)
+}
+
+func TestValidCreateIngredientController(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.POST("/api/ingredients", ingredientController.CreateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -409,11 +563,12 @@ func TestValidCreateRecipeController(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B",
+		"name":  "Buah Apel",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.POST, "/api/recipes", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/ingredients", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -421,10 +576,10 @@ func TestValidCreateRecipeController(t *testing.T) {
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
-		Success bool          `json:"success"`
-		Code    int           `json:"code"`
-		Message string        `json:"message"`
-		Data    models.Recipe `json:"data"`
+		Success bool              `json:"success"`
+		Code    int               `json:"code"`
+		Message string            `json:"message"`
+		Data    models.Ingredient `json:"data"`
 	}
 
 	var response Response
@@ -432,25 +587,26 @@ func TestValidCreateRecipeController(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, res.Code)
-	assert.Equal(t, "Success Create Recipe", response.Message)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Create Ingredient", response.Message)
 	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, "Recipe B", response.Data.Name)
+	assert.Equal(t, "Buah Apel", response.Data.Name)
+	assert.Equal(t, 1000, response.Data.Price)
 }
 
-func TestInvalidCreateRecipeControllerNotAdmin(t *testing.T) {
+func TestInvalidCreateIngredientControllerNotAdmin(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.POST("/api/recipes", recipesController.CreateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.POST("/api/ingredients", ingredientController.CreateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -485,11 +641,12 @@ func TestInvalidCreateRecipeControllerNotAdmin(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B",
+		"name":  "Buah Apel",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.POST, "/api/recipes", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/ingredients", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -507,23 +664,23 @@ func TestInvalidCreateRecipeControllerNotAdmin(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 401, res.Code)
+	assert.Equal(t, 401, response.Code)
 	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
-func TestInvalidCreateRecipeControllerNameNull(t *testing.T) {
+func TestInvalidCreateIngredientControllerAllNull(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.POST("/api/recipes", recipesController.CreateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.POST("/api/ingredients", ingredientController.CreateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -560,7 +717,7 @@ func TestInvalidCreateRecipeControllerNameNull(t *testing.T) {
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.POST, "/api/recipes", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.POST, "/api/ingredients", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -578,23 +735,23 @@ func TestInvalidCreateRecipeControllerNameNull(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestValidUpdateRecipeController(t *testing.T) {
+func TestValidUpdateIngredientController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -629,11 +786,12 @@ func TestValidUpdateRecipeController(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B Updated",
+		"name":  "Bawang Merah",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.PUT, "/api/recipes/2", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.PUT, "/api/ingredients/1", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -641,10 +799,10 @@ func TestValidUpdateRecipeController(t *testing.T) {
 
 	// -- Declare Response and Convert to JSON
 	type Response struct {
-		Success bool          `json:"success"`
-		Code    int           `json:"code"`
-		Message string        `json:"message"`
-		Data    models.Recipe `json:"data"`
+		Success bool              `json:"success"`
+		Code    int               `json:"code"`
+		Message string            `json:"message"`
+		Data    models.Ingredient `json:"data"`
 	}
 
 	var response Response
@@ -652,26 +810,27 @@ func TestValidUpdateRecipeController(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, res.Code)
-	assert.Equal(t, "Success Update Recipe", response.Message)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Update Ingredient", response.Message)
 	assert.NotEmpty(t, response.Data)
-	assert.Equal(t, uint(2), response.Data.ID)
-	assert.Equal(t, "Recipe B Updated", response.Data.Name)
+	assert.Equal(t, uint(1), response.Data.ID)
+	assert.Equal(t, "Bawang Merah", response.Data.Name)
+	assert.Equal(t, 1000, response.Data.Price)
 }
 
-func TestInvalidUpdateRecipeControllerNotAdmin(t *testing.T) {
+func TestInvalidUpdateIngredientControllerNotAdmin(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -706,11 +865,12 @@ func TestInvalidUpdateRecipeControllerNotAdmin(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B Updated",
+		"name":  "Bawang Merah",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.PUT, "/api/recipes/2", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.PUT, "/api/ingredients/1", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -728,23 +888,23 @@ func TestInvalidUpdateRecipeControllerNotAdmin(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 401, res.Code)
+	assert.Equal(t, 401, response.Code)
 	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
-func TestInvalidUpdateRecipeControllerNoId(t *testing.T) {
+func TestInvalidUpdateIngredientControllerNoId(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -779,11 +939,12 @@ func TestInvalidUpdateRecipeControllerNoId(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B Updated",
+		"name":  "Bawang Merah",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.PUT, "/api/recipes/id", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.PUT, "/api/ingredients/id", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -801,23 +962,23 @@ func TestInvalidUpdateRecipeControllerNoId(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestInvalidUpdateRecipeControllerFalseId(t *testing.T) {
+func TestInvalidUpdateIngredientControllerFalseId(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -852,11 +1013,12 @@ func TestInvalidUpdateRecipeControllerFalseId(t *testing.T) {
 
 	// -- Input
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{
-		"name": "Recipe B Updated",
+		"name":  "Bawang Merah",
+		"price": 1000,
 	})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.PUT, "/api/recipes/200", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.PUT, "/api/ingredients/100", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -874,23 +1036,23 @@ func TestInvalidUpdateRecipeControllerFalseId(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestInvalidUpdateRecipeControllerNameNull(t *testing.T) {
+func TestInvalidUpdateIngredientControllerAllNull(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.PUT("/api/recipes/:recipeId", recipesController.UpdateRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.PUT("/api/ingredients/:ingredientId", ingredientController.UpdateIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -927,7 +1089,7 @@ func TestInvalidUpdateRecipeControllerNameNull(t *testing.T) {
 	reqBodyPost, _ := json.Marshal(map[string]interface{}{})
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.PUT, "/api/recipes/2", bytes.NewBuffer(reqBodyPost))
+	req := httptest.NewRequest(echo.PUT, "/api/ingredients/1", bytes.NewBuffer(reqBodyPost))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -945,23 +1107,23 @@ func TestInvalidUpdateRecipeControllerNameNull(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestValidDeleteRecipeController(t *testing.T) {
+func TestValidDeleteIngredientController(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.DELETE("/api/recipes/:recipeId", recipesController.DeleteRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -995,7 +1157,7 @@ func TestValidDeleteRecipeController(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.DELETE, "/api/recipes/1", nil)
+	req := httptest.NewRequest(echo.DELETE, "/api/ingredients/1", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -1013,23 +1175,23 @@ func TestValidDeleteRecipeController(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, true, response.Success)
-	assert.Equal(t, 200, res.Code)
-	assert.Equal(t, "Success Delete Recipe", response.Message)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Delete Ingredient", response.Message)
 }
 
-func TestInvalidDeleteRecipeControllerNotAdmin(t *testing.T) {
+func TestInvalidDeleteIngredientControllerNotAdmin(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.DELETE("/api/recipes/:recipeId", recipesController.DeleteRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -1063,7 +1225,7 @@ func TestInvalidDeleteRecipeControllerNotAdmin(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.DELETE, "/api/recipes/1", nil)
+	req := httptest.NewRequest(echo.DELETE, "/api/ingredients/1", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -1081,23 +1243,23 @@ func TestInvalidDeleteRecipeControllerNotAdmin(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 401, res.Code)
+	assert.Equal(t, 401, response.Code)
 	assert.Equal(t, "Unauthorized Error", response.Message)
 }
 
-func TestInvalidDeleteRecipeControllerNoId(t *testing.T) {
+func TestInvalidDeleteIngredientControllerNoId(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.DELETE("/api/recipes/:recipeId", recipesController.DeleteRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -1131,7 +1293,7 @@ func TestInvalidDeleteRecipeControllerNoId(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.DELETE, "/api/recipes/id", nil)
+	req := httptest.NewRequest(echo.DELETE, "/api/ingredients/id", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -1149,23 +1311,23 @@ func TestInvalidDeleteRecipeControllerNoId(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }
 
-func TestInvalidDeleteRecipeControllerFalseId(t *testing.T) {
+func TestInvalidDeleteIngredientControllerFalseId(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()
 	db := util.MysqlDatabaseConnTest(config)
 	userModel := models.NewUserModel(db)
 	authController := auth.NewAuthController(userModel)
-	recipesModel := models.NewRecipeModel(db)
-	recipesController := NewRecipeController(recipesModel)
+	ingredientModel := models.NewIngredientModel(db)
+	ingredientController := NewIngredientController(ingredientModel)
 
 	// -- Declare Route
 	e := echo.New()
 	e.POST("/api/login", authController.LoginUserController)
-	e.DELETE("/api/recipes/:recipeId", recipesController.DeleteRecipeController, middleware.JWT([]byte(constants.SECRET_JWT)))
+	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, middleware.JWT([]byte(constants.SECRET_JWT)))
 
 	// ------ Start Login ------
 	// -- Input
@@ -1199,7 +1361,7 @@ func TestInvalidDeleteRecipeControllerFalseId(t *testing.T) {
 	// ------ End Login ------
 
 	// -- Setting Controller
-	req := httptest.NewRequest(echo.DELETE, "/api/recipes/300", nil)
+	req := httptest.NewRequest(echo.DELETE, "/api/ingredients/100", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
 	req.Header.Set("Content-Type", "application/json")
 	res := httptest.NewRecorder()
@@ -1217,6 +1379,6 @@ func TestInvalidDeleteRecipeControllerFalseId(t *testing.T) {
 	json.Unmarshal(res.Body.Bytes(), &response)
 
 	assert.Equal(t, false, response.Success)
-	assert.Equal(t, 400, res.Code)
+	assert.Equal(t, 400, response.Code)
 	assert.Equal(t, "Bad Request", response.Message)
 }

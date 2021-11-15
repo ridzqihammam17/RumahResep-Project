@@ -43,13 +43,7 @@ func NewAuthController(userModel models.UserModel) *AuthController {
 func (controller *AuthController) RegisterUserController(c echo.Context) error {
 	var userRequest RegisterUserRequest
 
-	if err := c.Bind(&userRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
+	c.Bind(&userRequest)
 
 	getLocation, errLocation := location.Geocoding(userRequest.Address)
 	if errLocation != nil {
@@ -70,9 +64,15 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 		Longitude: getLocation.Longitude,
 		Role:      userRequest.Role,
 	}
+	if user.Name == "" || user.Email == "" || user.Password == "" || user.Address == "" || user.Gender == "" || user.Role == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
+	}
 
 	_, err := controller.userModel.Register(user)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -91,16 +91,9 @@ func (controller *AuthController) RegisterUserController(c echo.Context) error {
 func (controller *AuthController) LoginUserController(c echo.Context) error {
 	var userRequest LoginUserRequest
 
-	if err := c.Bind(&userRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"code":    400,
-			"message": "Bad Request",
-		})
-	}
+	c.Bind(&userRequest)
 
-	user, err := controller.userModel.Login(userRequest.Email, userRequest.Password)
-
+	data, err := controller.userModel.Login(userRequest.Email, userRequest.Password)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -113,6 +106,6 @@ func (controller *AuthController) LoginUserController(c echo.Context) error {
 		"success": true,
 		"code":    200,
 		"message": "Success Login",
-		"token":   user.Token,
+		"token":   data.Token,
 	})
 }

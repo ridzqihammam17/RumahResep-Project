@@ -2,19 +2,24 @@ openapi: 3.0.3
 info:
   title: RumahResep
   version: 1.0.0
-  description: RumahResep RESTfulAPI Documentation with Echo Framework (Go Languange)
+  description: |
+    RESTfulAPI Documentation with Echo Framework (Go Languange)
+    
+    **Description**
+    
+    RumahResep merupakan sebuah aplikasi penjualan berbagai macam resep berserta bahan yang menjadi satu. Disini Customer dapat membeli resep dan bahan sekaligus sehingga customer tidak perlu lagi mencari bahan dalam membuat suatu resep. Pada aplikasi ini resep dan bahan ditambahkan oleh penjual itu sendiri yang bertindak sebagai Admin. Untuk supply bahan untuk memenuhi suatu resep, Admin berkerja sama dengan beberapa supplier yang disini disebut sebagai Seller. Seller disini dapat melakukan restock bahan sesuai resep yang nantinya akan dikirim kepada Customer yang melakukan pembelian.
+    
+     **Contributor**
+      1. Muchammad Abdurrochman
+      2. Fabrian Ivan Prasetya
+      3. Ridzqiawan Hammam Saputro
+
 servers:
   - url: http://servername/api/
     description: API Access Link for RumahResep
 tags:
   - name: Auth
     description: API Authentication
-  # - name: Customers
-  #   description: API Customers
-  # - name: Sellers
-  #   description: API Sellers
-  # - name: Profiles
-  #   description: API Profiles
   - name: Recipes
     description: API Recipes
   - name: Ingredients
@@ -33,10 +38,6 @@ tags:
     description: API Payments
   - name: Stocks
     description: API Stock Recipes
-  # - name: Payment Midtrans
-  #   description: API Snap Midtrans
-  # - name: Maps
-  #   description: API Location Maps
 
 paths:
   /register:
@@ -857,6 +858,13 @@ paths:
       tags:
         - Checkouts
       summary: Add Cart to Transaction - Customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID For Spesific Recipe
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -956,6 +964,11 @@ paths:
           $ref: '#/components/responses/ServerError'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   responses:
     StatusOK:
       description: Status OK

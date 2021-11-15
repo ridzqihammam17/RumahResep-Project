@@ -34,18 +34,28 @@ func (controller *StockController) CreateStockUpdateController(c echo.Context) e
 	}
 
 	var stock models.Stock
-	if err := c.Bind(&stock); err != nil {
+	c.Bind(&stock)
+
+	ingredientId, err := strconv.Atoi(c.Param("ingredientId"))
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
 			"message": "Bad Request",
 		})
 	}
-	ingredientId, _ := strconv.Atoi(c.Param("ingredientId"))
+
 	newStock := models.Stock{
 		IngredientId: uint(ingredientId),
 		Stock:        stock.Stock,
 		UserId:       userId,
+	}
+	if newStock.Stock == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	output, err := controller.stockModel.CreateStockUpdate(newStock, ingredientId)
@@ -60,7 +70,7 @@ func (controller *StockController) CreateStockUpdateController(c echo.Context) e
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"code":    200,
-		"message": "Success Restock Ingredient",
+		"message": "Success Create Stock Ingredient",
 		"data":    output,
 	})
 
@@ -77,18 +87,28 @@ func (controller *StockController) UpdateStockController(c echo.Context) error {
 	}
 
 	var stock models.Stock
-	if err := c.Bind(&stock); err != nil {
+	c.Bind(&stock)
+
+	ingredientId, err := strconv.Atoi(c.Param("ingredientId"))
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"code":    400,
 			"message": "Bad Request",
 		})
 	}
-	ingredientId, _ := strconv.Atoi(c.Param("ingredientId"))
+
 	newStock := models.Stock{
 		IngredientId: uint(ingredientId),
 		Stock:        stock.Stock,
 		UserId:       userId,
+	}
+	if newStock.Stock == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
 
 	output, err := controller.stockModel.Restock(newStock, ingredientId, int(userId))
@@ -111,10 +131,13 @@ func (controller *StockController) UpdateStockController(c echo.Context) error {
 func (controller *StockController) GetRestockDateController(c echo.Context) error {
 	daterange := c.Param("range")
 	if daterange != "daily" && daterange != "weekly" && daterange != "monthly" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid range")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"code":    400,
+			"message": "Bad Request",
+		})
 	}
-	// var user models.User
-	//check role admin or not
+
 	_, role := middlewares.ExtractTokenUser(c)
 	if role != "seller" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
