@@ -15,7 +15,7 @@ info:
       3. Ridzqiawan Hammam Saputro
 
 servers:
-  - url: http://servername/api/
+  - url: 'http://ec2-3-1-102-117.ap-southeast-1.compute.amazonaws.com:8080/api/'
     description: API Access Link for RumahResep
 tags:
   - name: Auth
