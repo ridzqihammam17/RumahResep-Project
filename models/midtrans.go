@@ -12,6 +12,11 @@ import (
 
 type JSON map[string]interface{}
 
+type Response struct {
+	PaymentType       string `json:"payment_type"`
+	TransactionStatus string `json:"transaction_status"`
+}
+
 func RequestPayment(OrderId int, amount int) (redirectURL string, err error) {
 
 	if OrderId <= 0 || amount <= 0 {
@@ -60,7 +65,7 @@ func RequestPayment(OrderId int, amount int) (redirectURL string, err error) {
 	return string(body[temp1 : len(body)-2]), nil
 }
 
-func StatusPayment(OrderId string) (redirectURL string, err error) {
+func StatusPayment(OrderId string) (redirectURL string, resp Response, err error) {
 	url := "https://api.sandbox.midtrans.com/v2/" + OrderId + "/status"
 	method := "GET"
 
@@ -80,5 +85,9 @@ func StatusPayment(OrderId string) (redirectURL string, err error) {
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	return string(body), nil
+	var response Response
+	json.Unmarshal(body, &response)
+	fmt.Println(response)
+
+	return string(body), response, nil
 }

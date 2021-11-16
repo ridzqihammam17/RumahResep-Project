@@ -20,7 +20,7 @@ func NewCheckoutModel(db *gorm.DB) *GormCheckoutModel {
 
 type CheckoutModel interface {
 	CreateCheckout(checkout Checkout) (Checkout, error)
-	UpdateCheckoutIdOnCartDetails(recipeId, checkoutId int) (CartDetails, error)
+	UpdateCheckoutIdOnCartDetails(recipeId, checkoutId, cartId int) (CartDetails, error)
 }
 
 func (m *GormCheckoutModel) CreateCheckout(checkout Checkout) (Checkout, error) {
@@ -30,18 +30,24 @@ func (m *GormCheckoutModel) CreateCheckout(checkout Checkout) (Checkout, error) 
 	return checkout, nil
 }
 
-func (m *GormCheckoutModel) UpdateCheckoutIdOnCartDetails(recipeId, checkoutId int) (CartDetails, error) {
+func (m *GormCheckoutModel) UpdateCheckoutIdOnCartDetails(recipeId, checkoutId, cartId int) (CartDetails, error) {
 	var cartDetails CartDetails
-	var newCartDetails CartDetails
-	if err := m.db.Find(&newCartDetails, "recipe_id = ?", recipeId).Error; err != nil {
+	// var newCartDetails CartDetails
+
+	if err := m.db.Raw("UPDATE cart_details SET checkout_id = ? WHERE recipe_id = ? AND cart_id = ?", checkoutId, recipeId, cartId).Scan(&cartDetails).Error; err != nil {
 		return cartDetails, err
 	}
 
-	newCartDetails.CheckoutID = checkoutId
-	// newRecipe.Category = recipe.Category
+	return cartDetails, nil
+	// if err := m.db.Find(&newCartDetails, "recipe_id = ?", recipeId).Error; err != nil {
+	// 	return cartDetails, err
+	// }
 
-	if err := m.db.Save(&newCartDetails).Error; err != nil {
-		return newCartDetails, err
-	}
-	return newCartDetails, nil
+	// newCartDetails.CheckoutID = checkoutId
+	// // newRecipe.Category = recipe.Category
+
+	// if err := m.db.Save(&newCartDetails).Error; err != nil {
+	// 	return newCartDetails, err
+	// }
+	// return newCartDetails, nil
 }

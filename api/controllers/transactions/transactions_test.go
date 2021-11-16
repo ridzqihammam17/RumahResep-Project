@@ -173,6 +173,282 @@ func setup() {
 	// ------ End Cart Detail ------
 }
 
+func TestValidGetAllTransactionAdmin(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	transactionModel := models.NewTransactionModel(db)
+	cartModel := models.NewCartModel(db)
+	transactionController := NewTransactionController(transactionModel, cartModel, userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/transactions", transactionController.GetAllTransactionAdmin, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "budi@mail.com",
+		"password": "passAdmin",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/transactions", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.Transaction `json:"data"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, true, response.Success)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Get All Transaction", response.Message)
+}
+
+func TestInvalidGetAllTransactionAdminNotAdmin(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	transactionModel := models.NewTransactionModel(db)
+	cartModel := models.NewCartModel(db)
+	transactionController := NewTransactionController(transactionModel, cartModel, userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/transactions", transactionController.GetAllTransactionAdmin, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "rudi@test.com",
+		"password": "rudi99",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/transactions", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.Transaction `json:"data"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized Error", response.Message)
+}
+
+func TestValidGetAllTransaction(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	transactionModel := models.NewTransactionModel(db)
+	cartModel := models.NewCartModel(db)
+	transactionController := NewTransactionController(transactionModel, cartModel, userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/transactions/list", transactionController.GetAllTransactionCustomer, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "rudi@test.com",
+		"password": "rudi99",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/transactions/list", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.Transaction `json:"data"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, true, response.Success)
+	assert.Equal(t, 200, response.Code)
+	assert.Equal(t, "Success Get All Transaction", response.Message)
+}
+
+func TestInvalidGetAllTransactionNotCustomer(t *testing.T) {
+	// -- Create Connection and Controller
+	config := config.GetConfig()
+	db := util.MysqlDatabaseConnTest(config)
+	userModel := models.NewUserModel(db)
+	authController := auth.NewAuthController(userModel)
+	transactionModel := models.NewTransactionModel(db)
+	cartModel := models.NewCartModel(db)
+	transactionController := NewTransactionController(transactionModel, cartModel, userModel)
+
+	// -- Declare Route
+	e := echo.New()
+	e.POST("/api/login", authController.LoginUserController)
+	e.GET("/api/transactions/list", transactionController.GetAllTransactionCustomer, middleware.JWT([]byte(constants.SECRET_JWT)))
+
+	// ------ Start Login ------
+	// -- Input
+	reqBodyPostLogin, _ := json.Marshal(map[string]interface{}{
+		"email":    "budi@mail.com",
+		"password": "passAdmin",
+	})
+
+	// -- Setting Controller
+	reqLogin := httptest.NewRequest(echo.POST, "/api/login", bytes.NewBuffer(reqBodyPostLogin))
+	reqLogin.Header.Set("Content-Type", "application/json")
+	resLogin := httptest.NewRecorder()
+	e.ServeHTTP(resLogin, reqLogin)
+
+	// -- Declare Response and Convert to JSON
+	type ResponseLogin struct {
+		Success bool   `json:"success"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}
+
+	var responseLogin ResponseLogin
+
+	json.Unmarshal(resLogin.Body.Bytes(), &responseLogin)
+
+	assert.Equal(t, true, responseLogin.Success)
+	assert.Equal(t, 200, resLogin.Code)
+	assert.Equal(t, "Success Login", responseLogin.Message)
+	assert.NotEqual(t, "", responseLogin.Token)
+	// ------ End Login ------
+
+	// -- Setting Controller
+	req := httptest.NewRequest(echo.GET, "/api/transactions/list", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", responseLogin.Token))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	e.ServeHTTP(res, req)
+
+	type Response struct {
+		Success bool               `json:"success"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    models.Transaction `json:"data"`
+	}
+
+	var response Response
+
+	json.Unmarshal(res.Body.Bytes(), &response)
+
+	assert.Equal(t, false, response.Success)
+	assert.Equal(t, 401, response.Code)
+	assert.Equal(t, "Unauthorized Error", response.Message)
+}
+
 func TestValidCreateTransaction(t *testing.T) {
 	// -- Create Connection and Controller
 	config := config.GetConfig()

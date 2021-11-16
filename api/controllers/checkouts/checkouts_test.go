@@ -241,7 +241,8 @@ func TestCreateCheckoutAuthInvalidController(t *testing.T) {
 	checkoutModel := models.NewCheckoutModel(db)
 	stockModel := models.NewStockModel(db)
 	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
-	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel)
+	cartModel := models.NewCartModel(db)
+	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel, cartModel)
 
 	// Setting Route
 	token := AuthInvalid(t)
@@ -275,7 +276,8 @@ func TestCreateCheckoutBadRequestController(t *testing.T) {
 	checkoutModel := models.NewCheckoutModel(db)
 	stockModel := models.NewStockModel(db)
 	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
-	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel)
+	cartModel := models.NewCartModel(db)
+	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel, cartModel)
 
 	// Setting Route
 	token := AuthValid(t)
@@ -309,7 +311,8 @@ func TestCreateCheckoutController(t *testing.T) {
 	checkoutModel := models.NewCheckoutModel(db)
 	stockModel := models.NewStockModel(db)
 	recipeIngredientModel := models.NewRecipeIngredientsModel(db)
-	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel)
+	cartModel := models.NewCartModel(db)
+	checkoutController := NewCheckoutController(checkoutModel, stockModel, recipeIngredientModel, cartModel)
 
 	// Setting Route
 	token := AuthValid(t)

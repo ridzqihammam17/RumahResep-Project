@@ -80,11 +80,15 @@ func Route(
 	e.DELETE("/api/ingredients/:ingredientId", ingredientController.DeleteIngredientController, jwtMiddleware)
 
 	// ------------------------------------------------------------------
-	// Restock Date
+	// Stock
 	// ------------------------------------------------------------------
 	e.POST("/api/stocks/:ingredientId", stockController.CreateStockUpdateController, jwtMiddleware)
-	e.PUT("/api/stocks/:ingredientId", stockController.UpdateStockController, jwtMiddleware)
-	e.GET("/api/stocks/:range", stockController.GetRestockDateController, jwtMiddleware)
+
+	// ------------------------------------------------------------------
+	// Restock
+	// ------------------------------------------------------------------
+	e.GET("/api/restocks", stockController.GetRestockAllController, jwtMiddleware)
+	e.GET("/api/restocks/:range", stockController.GetRestockDateController, jwtMiddleware)
 
 	// Recipe Ingredients
 	// ------------------------------------------------------------------
@@ -112,6 +116,8 @@ func Route(
 	// ------------------------------------------------------------------
 	// Transactions
 	// ------------------------------------------------------------------
+	e.GET("/api/transactions", transactionController.GetAllTransactionAdmin, jwtMiddleware)
+	e.GET("/api/transactions/list", transactionController.GetAllTransactionCustomer, jwtMiddleware)
 	e.POST("/api/transactions", transactionController.CreateTransaction, jwtMiddleware)
 
 	// ------------------------------------------------------------------

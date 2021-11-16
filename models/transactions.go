@@ -26,6 +26,8 @@ func NewTransactionModel(db *gorm.DB) *GormTransactionModel {
 }
 
 type TransactionModel interface {
+	GetAllTransactionAdmin() ([]Transaction, error)
+	GetAllTransaction(userId int) ([]Transaction, error)
 	CreateTransaction(Transaction) (Transaction, error)
 	GetCheckoutId(cartId int) (int, error)
 	GetUserData(userId int) (Transaction, error)
@@ -33,7 +35,24 @@ type TransactionModel interface {
 	Get(transactionId int) (Transaction, error)
 	Add(Transaction) (Transaction, error)
 	GetTotalPayment(transactionId int) (int, error)
+	UpdatePaymentMethodAndStatus(paymentMethod, paymentStatus string, transactionId int) (Transaction, error)
 	// ChooseShippingPaymentMethod(checkoutId int, transaction Transaction) (Transaction, error)
+}
+
+func (m *GormTransactionModel) GetAllTransactionAdmin() ([]Transaction, error) {
+	var transaction []Transaction
+	if err := m.db.Find(&transaction).Error; err != nil {
+		return nil, err
+	}
+	return transaction, nil
+}
+
+func (m *GormTransactionModel) GetAllTransaction(userId int) ([]Transaction, error) {
+	var transaction []Transaction
+	if err := m.db.Where("user_id=?", userId).Find(&transaction).Error; err != nil {
+		return nil, err
+	}
+	return transaction, nil
 }
 
 func (m *GormTransactionModel) CreateTransaction(transactions Transaction) (Transaction, error) {
@@ -94,4 +113,12 @@ func (m *GormTransactionModel) Get(transactionId int) (Transaction, error) {
 
 func (m *GormTransactionModel) Add(transaction Transaction) (Transaction, error) {
 	return transaction, nil
+}
+
+func (m *GormTransactionModel) UpdatePaymentMethodAndStatus(paymentMethod, paymentStatus string, transactionId int) (Transaction, error) {
+	var newTransaction Transaction
+	if err := m.db.Raw("UPDATE transactions SET payment_method = ?, payment_status = ? WHERE id = ?", paymentMethod, paymentStatus, transactionId).Scan(&newTransaction).Error; err != nil {
+		return newTransaction, err
+	}
+	return newTransaction, nil
 }
