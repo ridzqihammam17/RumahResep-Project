@@ -28,7 +28,7 @@ func RequestPayment(OrderId int, amount int) (redirectURL string, err error) {
 	method := "POST"
 
 	payload, err := json.Marshal(JSON{
-		"transaction_details": JSON{"order_id": OrderId, "gross_amount": amount},
+		"transaction_details": JSON{"order_id": fmt.Sprintf("aaa-", OrderId), "gross_amount": amount},
 		"credit_card":         JSON{"secure": true},
 	})
 	if err != nil {
