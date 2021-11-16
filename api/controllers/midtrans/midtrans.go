@@ -43,11 +43,9 @@ func (controller *MidtransController) RequestPayment(c echo.Context) error {
 }
 
 func (controller *MidtransController) StatusPayment(c echo.Context) error {
-	idSplit := strings.Split(c.Param("id"), "-")
 
-	ids, _ := strconv.Atoi(idSplit[1])
-	// ids := c.Param("id")
-	data, resp, err := models.StatusPayment(idSplit[1])
+	ids := c.Param("id")
+	data, resp, err := models.StatusPayment(ids)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -55,8 +53,9 @@ func (controller *MidtransController) StatusPayment(c echo.Context) error {
 			"message": "Internal Server Error",
 		})
 	}
+	id, _ := strconv.Atoi(ids)
 
-	_, err = controller.transactionModel.UpdatePaymentMethodAndStatus(resp.PaymentType, resp.TransactionStatus, ids)
+	_, err = controller.transactionModel.UpdatePaymentMethodAndStatus(resp.PaymentType, resp.TransactionStatus, id)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
