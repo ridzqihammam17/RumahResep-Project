@@ -14,13 +14,15 @@ type CheckoutController struct {
 	checkoutModel         models.CheckoutModel
 	stockModel            models.StockModel
 	reciepingredientModel models.RecipeIngredientsModel
+	cartModel             models.CartModel
 }
 
-func NewCheckoutController(checkoutModel models.CheckoutModel, stockModel models.StockModel, recipeIngredientModel models.RecipeIngredientsModel) *CheckoutController {
+func NewCheckoutController(checkoutModel models.CheckoutModel, stockModel models.StockModel, recipeIngredientModel models.RecipeIngredientsModel, cartModel models.CartModel) *CheckoutController {
 	return &CheckoutController{
 		checkoutModel,
 		stockModel,
 		recipeIngredientModel,
+		cartModel,
 	}
 }
 
@@ -39,7 +41,7 @@ func (controller *CheckoutController) CreateCheckoutController(c echo.Context) e
 		recipeId = append(recipeId, value)
 	}
 
-	_, role := middlewares.ExtractTokenUser(c)
+	userId, role := middlewares.ExtractTokenUser(c)
 	if role != "customer" {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"success": false,
@@ -58,8 +60,10 @@ func (controller *CheckoutController) CreateCheckoutController(c echo.Context) e
 		})
 	}
 
+	cartId, _ := controller.cartModel.GetCartIdByUserId(int(userId))
+
 	for _, v := range recipeId {
-		if _, err := controller.checkoutModel.UpdateCheckoutIdOnCartDetails(v, int(output.ID)); err != nil {
+		if _, err := controller.checkoutModel.UpdateCheckoutIdOnCartDetails(v, int(output.ID), cartId); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"success": false,
 				"code":    500,

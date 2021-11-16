@@ -1,7 +1,6 @@
 package midtrans
 
 import (
-	"fmt"
 	"net/http"
 	"rumah_resep/models"
 	"strconv"
@@ -45,9 +44,10 @@ func (controller *MidtransController) RequestPayment(c echo.Context) error {
 
 func (controller *MidtransController) StatusPayment(c echo.Context) error {
 	idSplit := strings.Split(c.Param("id"), "-")
+
 	ids, _ := strconv.Atoi(idSplit[1])
 	// ids := c.Param("id")
-	data, resp, err := models.StatusPayment(c.Param("id"))
+	data, resp, err := models.StatusPayment(idSplit[1])
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
@@ -56,7 +56,6 @@ func (controller *MidtransController) StatusPayment(c echo.Context) error {
 		})
 	}
 
-	fmt.Println(ids)
 	_, err = controller.transactionModel.UpdatePaymentMethodAndStatus(resp.PaymentType, resp.TransactionStatus, ids)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
