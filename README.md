@@ -21,7 +21,9 @@ RumahResep merupakan sebuah aplikasi penjualan berbagai macam resep berserta bah
 ![ERD](https://github.com/ridzqihammam17/RumahResep-Project/blob/main/screenshoot/erd.png)
 
 # Testing Coverage
-![TESTING](https://github.com/ridzqihammam17/RumahResep-Project/blob/main/screenshoot/testing_coverage.png)
+Implement Unit Testing average above 85%
+
+![TESTING](https://github.com/ridzqihammam17/RumahResep-Project/blob/main/screenshoot/testing_coverage.PNG)
 
 # Feature
 List of overall feature in this Project (To get more details see the API Documentation below)
