@@ -60,5 +60,5 @@ Read the API documentation here [API Endpoint Documentation](https://app.swagger
 
 # Credits
 - [Muchammad Abdurrochman](https://github.com/Abdurrochman25) (Author)
-- [Fabrian Ivan Prasetya](https://github.com/fabrianivan21) (Author)
+- [Fabrian Ivan Prasetya](https://github.com/fabrianivan-id) (Author)
 - [Ridzqiawan Hammam](https://github.com/ridzqihammam17) (Author)
